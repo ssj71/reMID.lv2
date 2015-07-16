@@ -1,7 +1,6 @@
 
 using namespace std;
 #include <iostream>
-#include <sid.h>
 #include <math.h>
 #include <alloca.h>
 #include <cstdlib>
@@ -10,15 +9,16 @@ using namespace std;
 #include "midi.h"
 #include "prefs.h"
 
-short *buf=NULL;
-int buf_length=0;
+//TODO: remove these globals
+//short *buf=NULL;
+//int buf_length=0;
 
-double clock_freq;
-double freq_mult;
-double sample_freq;
-double clocks_per_sample;
+//double clock_freq;
+//double freq_mult;
+//double sample_freq;
+//double clocks_per_sample;
 
-sid_table_state_t **table_states=NULL;
+//sid_table_state_t **table_states=NULL;
 
 extern "C"
 void sid_close(SID **chips) {
@@ -33,35 +33,38 @@ void sid_close(SID **chips) {
 }
 
 extern "C"
-SID** sid_init() {
+CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	int i;
 	
-	SID** sid_chips=(SID**)malloc(sizeof(SID *)*(polyphony+1));
+	CHIPS* self=(CHIPS*)malloc(sizeof(CHIPS));
+	self.sid_chips=(SID**)malloc(sizeof(SID*)*(polyphony+1));
 	for(i=0; i<polyphony; i++) {
-		sid_chips[i]=new SID();
+		self.sid_chips[i]=new SID();
 
 		//sid_chips[i]->set_chip_model(MOS6581);
-		sid_chips[i]->set_chip_model(MOS8580);
-		sid_chips[i]->reset();
+		self.sid_chips[i]->set_chip_model(MOS8580);
+		self.sid_chips[i]->reset();
 		
 		// initialise SID volume to max if we're not doing volume at the SID level
-		if(!use_sid_volume) sid_chips[i]->write(0x18, 0x0f);
+		if(!use_sid_volume) self.sid_chips[i]->write(0x18, 0x0f);
 
 		//sid_chips[i]->write(0x04, 0x1);
 		//midi_keys[i]->needs_clearing=1;
 	}
-	sid_chips[i]=NULL;
+	self.sid_chips[i]=NULL;//safety net in case extra index is checked
 
-	table_states=(sid_table_state_t **)calloc(polyphony+1, sizeof(sid_table_state_t *));
+	self.table_states=(sid_table_state_t **)calloc(polyphony+1, sizeof(sid_table_state_t *));
 	for(i=0; i<polyphony; i++) {
-		table_states[i]=(sid_table_state_t *)calloc(1, sizeof(sid_table_state_t));
-		table_states[i]->stopped=1;
+		self.table_states[i]=(sid_table_state_t *)calloc(1, sizeof(sid_table_state_t));
+		self.table_states[i]->stopped=1;
 	}
-	table_states[i]=NULL;
+	self.table_states[i]=NULL;
 
 	cout << polyphony << " reSID chip polyphony system\n";
 
-	return sid_chips;
+    self.polyphony=polyphony;
+
+	return self;
 }
 
 extern "C"
@@ -336,6 +339,7 @@ void clear_key(int key) {
 
 extern "C"
 short *sid_process(SID **sid_chips, int num_samples) {
+    //TODO: Remove Mallocs into init (this can be bound)
 	if((sizeof(short)*num_samples*polyphony)>buf_length) {
 		buf_length=sizeof(short)*num_samples*polyphony;
 		if(buf!=NULL) free(buf);
