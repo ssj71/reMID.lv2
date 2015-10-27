@@ -1,4 +1,5 @@
 #include<sid.h>
+#include<midi.h>
 
 struct SID;
 
@@ -26,5 +27,5 @@ void sid_close(struct CHIPS *chips);
 
 void sid_set_srate(struct SID **chips, int pal, double sample_freq);
 
-short *sid_process(struct SID **chips, int num_samples);
+short *sid_process(struct SID **chips, struct midi_arrays* midi, int num_samples);
 

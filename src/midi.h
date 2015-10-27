@@ -14,7 +14,7 @@ struct midi_key_state {
 	//int aftertouch_state_changed;
 	//int aftertouch;
 };
-extern struct midi_key_state **midi_keys;
+//extern struct midi_key_state **midi_keys;
 
 struct midi_channel_state {
 	int in_use;
@@ -27,11 +27,20 @@ struct midi_channel_state {
 	int chanpress_changed;
 	int last_velocity;
 };
+
+struct midi_arrays {
+	midi_key_state **midi_keys;
+	midi_channel_state midi_channels[];
+	int midi_programs[];
+	double note_frqs[];
+};
+/*
 extern struct midi_channel_state midi_channels[];
 
 extern int midi_programs[];
 
 extern double note_frqs[];
+*/
 
 int init_midi(int polyphony);
 void read_midi(jack_nframes_t nframes);

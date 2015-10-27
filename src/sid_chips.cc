@@ -1,9 +1,10 @@
 
-using namespace std;
+//using namespace std;//I don't think we actually need this
 #include <iostream>
 #include <math.h>
 #include <alloca.h>
 #include <cstdlib>
+#include <stdio.h>
 
 #include "sid_instr.h"
 #include "midi.h"
@@ -63,7 +64,8 @@ CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	}
 	self->table_states[i]=NULL;
 
-	cout << polyphony << " reSID chip polyphony system\n";
+	//cout << polyphony << " reSID chip polyphony system\n";
+	printf("%i reSID chip polyphony system\n", polyphony);
 
     self->polyphony=polyphony;
 
@@ -158,7 +160,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 			case V1FREQ:
 				tab->v1_freq=(double)data1;
 				tab->v1_base_freq=tab->v1_freq;
-				i=(int)round(tab->v1_freq/freq_mult);
+				i=(int)round(tab->v1_freq/chips->freq_mult);
 				if(pt_debug) printf("v1freq %f\n", tab->v1_freq);
 				chips->sid_chips[chip_num]->write(0x00, i&0xff);
 				chips->sid_chips[chip_num]->write(0x01, i>>8);
@@ -166,7 +168,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 			case V2FREQ:
 				tab->v2_freq=(double)data1;
 				tab->v2_base_freq=tab->v2_freq;
-				i=(int)round(tab->v2_freq/freq_mult);
+				i=(int)round(tab->v2_freq/chips->freq_mult);
 				if(pt_debug) printf("v2freq %f\n", tab->v1_freq);
 				chips->sid_chips[chip_num]->write(0x07, i&0xff);
 				chips->sid_chips[chip_num]->write(0x08, i>>8);
@@ -174,7 +176,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 			case V3FREQ:
 				tab->v3_freq=(double)data1;
 				tab->v3_base_freq=tab->v3_freq;
-				i=(int)round(tab->v3_freq/freq_mult);
+				i=(int)round(tab->v3_freq/chips->freq_mult);
 				if(pt_debug) printf("v3freq %f\n", tab->v1_freq);
 				chips->sid_chips[chip_num]->write(0x0e, i&0xff);
 				chips->sid_chips[chip_num]->write(0x0f, i>>8);
@@ -183,7 +185,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v1_freq*=(1.0+(d/100.0));
 				tab->v1_base_freq=tab->v1_freq;
-				i=(int)round(tab->v1_freq/freq_mult);
+				i=(int)round(tab->v1_freq/chips->freq_mult);
 				if(pt_debug) printf("v1freqpct %d %f\n", data1, tab->v1_freq);
 				chips->sid_chips[chip_num]->write(0x00, i&0xff);
 				chips->sid_chips[chip_num]->write(0x01, i>>8);
@@ -192,7 +194,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v2_freq*=(1.0+(d/100.0));
 				tab->v2_base_freq=tab->v2_freq;
-				i=(int)round(tab->v2_freq/freq_mult);
+				i=(int)round(tab->v2_freq/chips->freq_mult);
 				if(pt_debug) printf("v2freqpct %d %f\n", data1, tab->v2_freq);
 				chips->sid_chips[chip_num]->write(0x07, i&0xff);
 				chips->sid_chips[chip_num]->write(0x08, i>>8);
@@ -201,7 +203,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v3_freq*=(1.0+(d/100.0));
 				tab->v3_base_freq=tab->v3_freq;
-				i=(int)round(tab->v3_freq/freq_mult);
+				i=(int)round(tab->v3_freq/chips->freq_mult);
 				if(pt_debug) printf("v3freqpct %d %f\n", data1, tab->v3_freq);
 				chips->sid_chips[chip_num]->write(0x0e, i&0xff);
 				chips->sid_chips[chip_num]->write(0x0f, i>>8);
@@ -210,7 +212,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v1_freq*=pow(2,(d/12.0));
 				tab->v1_base_freq=tab->v1_freq;
-				i=(int)round(tab->v1_freq/freq_mult);
+				i=(int)round(tab->v1_freq/chips->freq_mult);
 				if(pt_debug) printf("v1freqhs %d %f\n", data1, tab->v1_freq);
 				chips->sid_chips[chip_num]->write(0x00, i&0xff);
 				chips->sid_chips[chip_num]->write(0x01, i>>8);
@@ -219,7 +221,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v2_freq*=pow(2,(d/12.0));
 				tab->v2_base_freq=tab->v2_freq;
-				i=(int)round(tab->v2_freq/freq_mult);
+				i=(int)round(tab->v2_freq/chips->freq_mult);
 				if(pt_debug) printf("v2freqhs %d %f\n", data1, tab->v2_freq);
 				chips->sid_chips[chip_num]->write(0x07, i&0xff);
 				chips->sid_chips[chip_num]->write(0x08, i>>8);
@@ -228,7 +230,7 @@ void table_clock(CHIPS *chips, int chip_num) {
 				d=(double)data1;
 				tab->v3_freq*=pow(2,(d/12.0));
 				tab->v3_base_freq=tab->v3_freq;
-				i=(int)round(tab->v3_freq/freq_mult);
+				i=(int)round(tab->v3_freq/chips->freq_mult);
 				if(pt_debug) printf("v3freqhs %d %f\n", data1, tab->v3_freq);
 				chips->sid_chips[chip_num]->write(0x0e, i&0xff);
 				chips->sid_chips[chip_num]->write(0x0f, i>>8);
@@ -337,16 +339,16 @@ void table_clock(CHIPS *chips, int chip_num) {
 }
 
 //TODO: Why is this not in the midi section?
-void clear_key(int key) {
+void clear_key(midi_key_state** midi_keys, int key) {
 	//TODO: another global (midi keys)
 	midi_keys[key]->note_on=0;
 	midi_keys[key]->note_state_changed=0;
 }
 
 extern "C"
-short *sid_process(CHIPS *chips, int num_samples) {
-    //TODO: Remove Mallocs into init (this can be bound)
-	if((sizeof(short)*num_samples*polyphony)>chips->buf_length) {
+short *sid_process(CHIPS *chips, struct midi_arrays* midi, int num_samples) {
+    //TODO: Remove Mallocs into init (polyphony can be bound)
+	if((sizeof(short)*num_samples*chips->polyphony)>chips->buf_length) {
 		chips->buf_length=sizeof(short)*num_samples*chips->polyphony;
 		if(chips->buf!=NULL) free(chips->buf);
 		chips->buf=(short *)malloc(chips->buf_length);
@@ -358,48 +360,48 @@ short *sid_process(CHIPS *chips, int num_samples) {
 	for(i=0; i<chips->polyphony; i++) {
 		SID *sid=chips->sid_chips[i];
 		sid_table_state_t *tab=chips->table_states[i];
-		int channel=midi_keys[i]->channel;//TODO: midi keys is global
+		int channel=midi->midi_keys[i]->channel;
 		if(channel==-1) {
-			clear_key(i);
+			clear_key(midi->midi_keys,i);
 			continue;
 		}
-		int program=midi_channels[channel].program;//TODO: midi channels is global
+		int program=midi->midi_channels[channel].program;
 		if(program==-1) {
-			clear_key(i);
+			clear_key(midi->midi_keys,i);
 			continue;
 		}
-		int inst_num=midi_programs[program];
+		int inst_num=midi->midi_programs[program];
 		if(inst_num==-1) {
-			clear_key(i);
+			clear_key(midi->midi_keys,i);
 			continue;
 		}
 		//printf("%d: %d - %d\n", channel, program, inst_num);
-		sid_instrument_t *instr=sid_instr[inst_num];
+		sid_instrument_t *instr=sid_instr[inst_num];//TODO: global instrument thing
 
 		// percussion map
 		if(instr->type==PERCUSSION_MAP) {
-			int note=midi_keys[i]->note;
+			int note=midi->midi_keys[i]->note;
 			inst_num=instr->percussion_map[note];
 			if(inst_num==-1) {
-				clear_key(i);
+				clear_key(midi->midi_keys,i);
 				continue;
 			}
 			instr=sid_instr[inst_num];
 		}
 
 		// process new midi events
-		if(midi_keys[i]->note_state_changed) {
+		if(midi->midi_keys[i]->note_state_changed) {
 			//printf("using channel %d\n", channel);
 			//printf("using program %d\n", program);
 			//printf("using instrument %d\n", inst_num);
 
-			if(midi_keys[i]->needs_clearing) {
+			if(midi->midi_keys[i]->needs_clearing) {
 				sid->write(0x04, 0x0); // release voices
 				sid->write(0x0b, 0x0);
 				sid->write(0x12, 0x0);
-				midi_keys[i]->needs_clearing=0;
-			} else if(midi_keys[i]->note_on) {
-				double freq=note_frqs[midi_keys[i]->note];
+				midi->midi_keys[i]->needs_clearing=0;
+			} else if(midi->midi_keys[i]->note_on) {
+				double freq=midi->note_frqs[midi->midi_keys[i]->note];
 				int freqi=(int)round(freq/chips->freq_mult);
 				//int freq=note_frqs[midi_keys[i]->note];
 				//printf("%d, %d, %d\n", freq, freq&0xff, freq>>8);
@@ -466,7 +468,7 @@ short *sid_process(CHIPS *chips, int num_samples) {
 				sid->write(0x17, instr->fr_vic);
 
 				if(chips->use_sid_volume) {
-					int vol=midi_keys[i]->velocity/8;
+					int vol=midi->midi_keys[i]->velocity/8;
 					tab->vol=vol;
 				} else {
 					tab->vol=0xf;
@@ -486,7 +488,7 @@ short *sid_process(CHIPS *chips, int num_samples) {
 				tab->v3_control=instr->v3_control;
 				tab->v3_gate=1;
 
-				midi_keys[i]->note_state_changed=0;
+				midi->midi_keys[i]->note_state_changed=0;
 
 				tab->v1_pulse=instr->v1_pulse;
 				tab->v1_pulsemod=0;
@@ -502,7 +504,7 @@ short *sid_process(CHIPS *chips, int num_samples) {
 				tab->wait_ticks=0;
 				tab->stopped=0;
 				tab->pc=0;
-			} else if(!midi_channels[channel].sustain && !midi_keys[i]->note_on) {//TODO: midi globals
+			} else if(!midi->midi_channels[channel].sustain && !midi->midi_keys[i]->note_on) {
 				if(!tab->v1_no_midi_gate) {
 					sid->write(0x04, tab->v1_control&0xfe); // voice 1 waveform, start R
 					tab->v1_gate=0;
@@ -515,7 +517,7 @@ short *sid_process(CHIPS *chips, int num_samples) {
 					sid->write(0x12, tab->v3_control&0xfe); // voice 3 waveform, start R
 					tab->v3_gate=0;
 				}
-				midi_keys[i]->note_state_changed=0;
+				midi->midi_keys[i]->note_state_changed=0;
 			}
 		}
 
@@ -530,8 +532,8 @@ short *sid_process(CHIPS *chips, int num_samples) {
 		}*/
 
 		// pitchbend
-		if(midi_channels[channel].pitchbend != tab->pitchbend) {//TODO: midi globals
-			double d=((double)midi_channels[channel].pitchbend)/8192;
+		if(midi->midi_channels[channel].pitchbend != tab->pitchbend) {
+			double d=((double)midi->midi_channels[channel].pitchbend)/8192;
 			//printf("%f\n", d);
 			// TODO configurable range
 			double range=2.0; // pitchbend range in half steps
@@ -552,14 +554,14 @@ short *sid_process(CHIPS *chips, int num_samples) {
 			sid->write(0x0e, ipb&0xff);
 			sid->write(0x0f, ipb>>8);
 
-			tab->pitchbend=midi_channels[channel].pitchbend;
+			tab->pitchbend=midi->midi_channels[channel].pitchbend;
 		}
 
 		// vibrato control 0-127
 		// TODO fix return to zero
-		if(midi_channels[channel].vibrato_changed) {//TODO: midi globals
-			int vibrato=midi_channels[channel].vibrato;
-			if(!vibrato) midi_channels[channel].vibrato_changed=0;
+		if(midi->midi_channels[channel].vibrato_changed) {//TODO: midi globals
+			int vibrato=midi->midi_channels[channel].vibrato;
+			if(!vibrato) midi->midi_channels[channel].vibrato_changed=0;
 
 			// TODO - configurable range and speed
 			double range=2.0; // range of vibration in half steps

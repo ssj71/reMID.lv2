@@ -5,7 +5,7 @@ extern pthread_mutex_t prefs_mutex;
 
 extern char *instr_file;
 
-extern int polyphony;
+//extern int polyphony;
 extern int new_polyphony;
 
 extern int pal;

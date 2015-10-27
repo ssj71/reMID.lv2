@@ -27,6 +27,8 @@ int process(jack_nframes_t nframes, void *arg) {
 	static short high=0;
 	static short low=0;
 
+	struct CHIPS* sid_bank = (struct CHIPS*)arg;
+
 	pthread_mutex_lock(&prefs_mutex);
 
 	read_midi(nframes);
@@ -51,7 +53,7 @@ int process(jack_nframes_t nframes, void *arg) {
 			x=sid_buf[(i*nframes)+j];
 			sample_t a=((sample_t)x)/32768.0;
 
-			if(!use_sid_volume) a*=volume;
+			if(!sid_bank->use_sid_volume) a*=volume;
 
 			sample_t al=a*instr->vol_left;
 			sample_t ar=a*instr->vol_right;
@@ -102,7 +104,8 @@ void jack_connect_ports() {
 	}
 }
 
-int init_jack_audio() {
+//TODO: need to make super object with sid_bank, instrument and midi stuff together
+int init_jack_audio(struct CHIPS* sid_bank, int use_sid_volume) {
 
 	pthread_mutex_lock(&prefs_mutex);
 
@@ -120,9 +123,9 @@ int init_jack_audio() {
 
 	init_midi(polyphony);
 	prefs_read_instruments(instr_file);
-	sid_bank=sid_init();
+	sid_bank=sid_init(polyphony, use_sid_volume);
 	
-	jack_set_process_callback(client, process, 0);
+	jack_set_process_callback(client, process, sid_bank);
 	jack_set_sample_rate_callback(client, srate, 0);
 	jack_on_shutdown(client, jack_shutdown, 0);
 
