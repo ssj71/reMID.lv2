@@ -7,6 +7,7 @@ struct CHIPS
     struct SID** sid_chips;
 
     int polyphony;
+    int use_sid_volume
 
     short *buf;
     int buf_length;
@@ -19,9 +20,9 @@ struct CHIPS
     sid_table_state_t **table_states;
 };
 
-struct SID **sid_init();
+struct CHIPS *sid_init(int polyphony, int use_sid_volume);
 
-void sid_close(struct SID **chips);
+void sid_close(struct CHIPS *chips);
 
 void sid_set_srate(struct SID **chips, int pal, double sample_freq);
 
