@@ -11,17 +11,6 @@
 #include "prefs.h"
 #include "sid_chips.h"
 
-//TODO: remove these globals
-//short *buf=NULL;
-//int buf_length=0;
-
-//double clock_freq;
-//double freq_mult;
-//double sample_freq;
-//double clocks_per_sample;
-
-//sid_table_state_t **table_states=NULL;
-
 extern "C"
 void sid_close(CHIPS *chips) {
 	if(chips!=NULL) {

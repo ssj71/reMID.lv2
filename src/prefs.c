@@ -21,7 +21,7 @@ int pal=1;
 int pt_debug=0;
 
 int use_gui=1;
-int use_sid_volume=0;
+//int use_sid_volume=0;
 
 char *midi_connect_args[255];
 char *jack_connect_args[255];

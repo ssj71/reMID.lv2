@@ -28,7 +28,7 @@ void usage(char *prgname) {
 }
 
 int main(int argc, char **argv) {
-	int c;
+	int c, use_sid_volume;
 	pthread_t gui_thread;
 
 	prefs_init();
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	init_jack_audio();
+	init_jack_audio(use_sid_volume);
 
 #ifdef GUI
 	if(use_gui) {
