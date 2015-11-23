@@ -1,5 +1,5 @@
 
-#include <asoundlib.h>
+#include <alsa/asoundlib.h>
 
 #include "midi.h"
 
@@ -11,7 +11,7 @@ struct pollfd *pfd;
 char *clientname="reMID";
 char *portname="MIDI_In";
 
-alsa_read_midi() {
+alsa_read_midi(struct midi_channel_state* midi_channels) {
 	snd_seq_event_t *ev;
 	int channel, param, value;
 

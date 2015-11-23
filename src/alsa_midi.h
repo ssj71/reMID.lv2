@@ -1,3 +1,4 @@
+#include <midi.h>
 
 int alsa_init_seq(void);
 void alsa_midi_connect(int client, int port);

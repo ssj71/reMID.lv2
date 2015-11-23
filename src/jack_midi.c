@@ -19,7 +19,7 @@ jack_port_t *midi_port;
 void *midi_buf;
 jack_midi_event_t midi_event;
 
-jack_read_midi(jack_nframes_t nframes) {
+jack_read_midi(jack_nframes_t nframes, struct midi_channel_state *midi_channels) {
 	jack_nframes_t i;
 
 	midi_buf=jack_port_get_buffer(midi_port, nframes);
