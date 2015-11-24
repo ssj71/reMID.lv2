@@ -1,4 +1,4 @@
-#include<sid.h>
+#include<resid/sid.h>
 #include<midi.h>
 
 struct SID;

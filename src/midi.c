@@ -90,12 +90,12 @@ void note_off(struct midi_arrays* midi, int channel, int note) {
 	}
 }
 
-void read_midi(jack_nframes_t nframes) {
+void read_midi(jack_nframes_t nframes, struct midi_channel_state* midi_channels) {
 #ifdef ALSA_MIDI
-	alsa_read_midi();
+	alsa_read_midi(midi_channels);
 #endif
 #ifdef JACK_MIDI
-	jack_read_midi(nframes);
+	jack_read_midi(nframes, midi_channels);
 #endif
 }
 

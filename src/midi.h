@@ -30,7 +30,7 @@ struct midi_channel_state {
 
 struct midi_arrays {
 	struct midi_key_state **midi_keys;
-	struct midi_channel_state midi_channels[];
+	struct midi_channel_state *midi_channels;
 	int midi_programs[];
 	double note_frqs[];
 	int *free_voices;
@@ -46,7 +46,7 @@ extern double note_frqs[];
 */
 
 int init_midi(struct midi_arrays* midi, int polyphony);
-void read_midi(jack_nframes_t nframes);
+void read_midi(jack_nframes_t nframes, struct midi_channel_state* midi_channels);
 void note_on(int channel, int note, int velocity);
 void note_off(int channel, int note);
 void silence_all(struct midi_key_state **midi_keys);
