@@ -1,5 +1,7 @@
-#include<resid/sid.h>
-#include<midi.h>
+#ifndef SID_CHIPS_H
+#define SID_CHIPS_H
+#include "midi.h"
+#include "sid_instr.h"
 
 struct SID;
 
@@ -8,7 +10,7 @@ struct CHIPS
     struct SID** sid_chips;
 
     int polyphony;
-    int use_sid_volume
+    int use_sid_volume;
 
     short *buf;
     int buf_length;
@@ -25,7 +27,8 @@ struct CHIPS *sid_init(int polyphony, int use_sid_volume);
 
 void sid_close(struct CHIPS *chips);
 
-void sid_set_srate(struct SID **chips, int pal, double sample_freq);
+void sid_set_srate(struct CHIPS *chips, int pal, double sample_freq);
 
-short *sid_process(struct SID **chips, struct midi_arrays* midi, int num_samples);
+short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_samples);
 
+#endif

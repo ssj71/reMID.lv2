@@ -1,5 +1,7 @@
-
+#ifndef SID_INSTRUMENT_H
+#define SID_INSTRUMENT_H
 #include "jack_audio.h"
+
 
 enum OPCODES { 
 	NOP=0, 
@@ -117,3 +119,4 @@ typedef struct sid_table_state {
 } sid_table_state_t;
 extern sid_table_state_t **sid_table_states;
 
+#endif

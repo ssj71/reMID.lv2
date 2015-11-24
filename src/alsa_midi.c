@@ -11,7 +11,8 @@ struct pollfd *pfd;
 char *clientname="reMID";
 char *portname="MIDI_In";
 
-alsa_read_midi(struct midi_channel_state* midi_channels) {
+//void alsa_read_midi(struct midi_channel_state* midi_channels) {
+void alsa_read_midi(struct midi_arrays* midi) {
 	snd_seq_event_t *ev;
 	int channel, param, value;
 
@@ -22,51 +23,51 @@ alsa_read_midi(struct midi_channel_state* midi_channels) {
 		switch(ev->type) {
 			case SND_SEQ_EVENT_CONTROLLER:
 				channel=ev->data.control.channel;
-				if(!midi_channels[channel].in_use) break;
+				if(!midi->midi_channels[channel].in_use) break;
 				param=ev->data.control.param;
 				value=ev->data.control.value;
 				if(param==64) {
-					if(value>64) midi_channels[channel].sustain=1;
-					else midi_channels[channel].sustain=0;
+					if(value>64) midi->midi_channels[channel].sustain=1;
+					else midi->midi_channels[channel].sustain=0;
 				} else if(param==1) {
 					// modulation controlling vibrato: value=0-127
-					midi_channels[channel].vibrato=value;
+					midi->midi_channels[channel].vibrato=value;
 					//printf("%d\n", value);
-					midi_channels[channel].vibrato_changed=1;
+					midi->midi_channels[channel].vibrato_changed=1;
 				}
 				break;
 			// case SND_SEQ_EVENT_KEYPRESS:
 			case SND_SEQ_EVENT_CHANPRESS:
 				channel=ev->data.control.channel;
-				if(!midi_channels[channel].in_use) break;
+				if(!midi->midi_channels[channel].in_use) break;
 				value=ev->data.control.value;
-				midi_channels[channel].chanpress=value;
-				midi_channels[channel].chanpress_changed=1;
+				midi->midi_channels[channel].chanpress=value;
+				midi->midi_channels[channel].chanpress_changed=1;
 				break;
 			case SND_SEQ_EVENT_NOTEON:
-				channel=ev->data.note.channel;
-				if(!midi_channels[channel].in_use) break;
-				note_on(channel, ev->data.note.note,
+				channel = ev->data.note.channel;
+				if(!midi->midi_channels[channel].in_use) break;
+				note_on(midi, channel, ev->data.note.note,
 					ev->data.note.velocity);
 				break;
 			case SND_SEQ_EVENT_NOTEOFF:
-				channel=ev->data.note.channel;
-				if(!midi_channels[channel].in_use) break;
-				note_off(channel, ev->data.note.note);
+				channel = ev->data.note.channel;
+				if(!midi->midi_channels[channel].in_use) break;
+				note_off(midi, channel, ev->data.note.note);
 				break;
 			case SND_SEQ_EVENT_PITCHBEND:
 				// value=-8192 to +8191
 				channel=ev->data.control.channel;
-				if(!midi_channels[channel].in_use) break;
+				if(!midi->midi_channels[channel].in_use) break;
 				value=ev->data.control.value;
-				midi_channels[channel].pitchbend=value;
+				midi->midi_channels[channel].pitchbend=value;
 				break;
 			case SND_SEQ_EVENT_PGMCHANGE:
 				channel=ev->data.control.channel;
-				if(midi_channels[channel].program==-1) break;
+				if(midi->midi_channels[channel].program==-1) break;
 				value=ev->data.control.value;
 				//printf("prg change %d\n", value);
-				midi_channels[channel].program=value;
+				midi->midi_channels[channel].program=value;
 				break;
 		}
 	} while (snd_seq_event_input_pending(seq_handle, 0)>0);

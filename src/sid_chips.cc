@@ -5,6 +5,7 @@
 #include <alloca.h>
 #include <cstdlib>
 #include <stdio.h>
+#include <resid/sid.h>
 
 #include "sid_instr.h"
 #include "midi.h"
@@ -12,7 +13,7 @@
 #include "sid_chips.h"
 
 extern "C"
-void sid_close(CHIPS *chips) {
+void sid_close(struct CHIPS *chips) {
 	if(chips!=NULL) {
         if(chips->sid_chips!=NULL)
             for(int i=0; chips->sid_chips[i]; i++) delete chips->sid_chips[i];
@@ -25,10 +26,10 @@ void sid_close(CHIPS *chips) {
 }
 
 extern "C"
-CHIPS* sid_init(int polyphony, int use_sid_volume) {
+struct CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	int i;
 	
-	CHIPS* self=(CHIPS*)malloc(sizeof(CHIPS));
+	struct CHIPS* self=(struct CHIPS*)malloc(sizeof(struct CHIPS));
 	self->sid_chips=(SID**)malloc(sizeof(SID*)*(polyphony+1));
 	for(i=0; i<polyphony; i++) {
 		self->sid_chips[i]=new SID();
@@ -62,7 +63,7 @@ CHIPS* sid_init(int polyphony, int use_sid_volume) {
 }
 
 extern "C"
-void sid_set_srate(CHIPS *chips, int pal, double srate) {
+void sid_set_srate(struct CHIPS *chips, int pal, double srate) {
 	int i;
 
 	chips->sample_freq=srate;
@@ -82,7 +83,7 @@ void sid_set_srate(CHIPS *chips, int pal, double srate) {
 	}
 }
 
-void table_clock(CHIPS *chips, int chip_num) {
+void table_clock(struct CHIPS *chips, int chip_num) {
 	sid_table_state_t *tab=chips->table_states[chip_num];
 
 	// pulse mods
@@ -335,7 +336,7 @@ void clear_key(midi_key_state** midi_keys, int key) {
 }
 
 extern "C"
-short *sid_process(CHIPS *chips, struct midi_arrays* midi, int num_samples) {
+short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_samples) {
     //TODO: Remove Mallocs into init (polyphony can be bound)
 	if((sizeof(short)*num_samples*chips->polyphony)>chips->buf_length) {
 		chips->buf_length=sizeof(short)*num_samples*chips->polyphony;

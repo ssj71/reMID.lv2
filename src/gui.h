@@ -1,3 +1,5 @@
+#ifndef GUI_H
+#define GUI_H
 
 typedef struct gui_args {
 	int argc;
@@ -6,3 +8,4 @@ typedef struct gui_args {
 
 void *gui_start(void *args);
 
+#endif

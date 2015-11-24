@@ -1,12 +1,11 @@
-
-#ifndef JACK_AUDIO_H
-#define JACK_AUDIO_H
+#ifndef MY_JACK_AUDIO_H
+#define MY_JACK_AUDIO_H
 
 #include <jack/jack.h>
-#include "sid_chips.h"
 #include "midi.h"
-
 typedef jack_default_audio_sample_t sample_t;
+#include "sid_chips.h" //this must appear out of order due to a circular dependency around the above typedef
+
 
 extern jack_client_t *client;
 extern char *jclientname;

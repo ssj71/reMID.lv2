@@ -2,6 +2,7 @@
 #include <jack/jack.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 
 #include "jack_audio.h"
@@ -25,7 +26,7 @@ struct super{
 	jack_client_t *client;
 	jack_port_t *output_port_l;
 	jack_port_t *output_port_r;
-	char port_names[2][16]
+	char port_names[2][16];
 };
 
 int process(jack_nframes_t nframes, void *arg) {
@@ -41,25 +42,25 @@ int process(jack_nframes_t nframes, void *arg) {
 
 	read_midi(nframes, s->midi->midi_channels);
 
-	sample_t *outl=(sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
+	sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
 	for(i=0; i<nframes; i++) outl[i]=0.0;
 	sample_t *outr=(sample_t *)jack_port_get_buffer(s->output_port_r, nframes);
 	for(i=0; i<nframes; i++) outr[i]=0.0;
 
-	short *sid_buf=sid_process(s->sid_bank, (int)nframes);
-	for(i=0; i<polyphony; i++) {
-		int channel=s->midi->midi_keys[i]->channel;
+	short *sid_buf = sid_process(s->sid_bank, s->midi, (int)nframes);
+	for(i=0; i<s->sid_bank->polyphony; i++) {
+		int channel = s->midi->midi_keys[i]->channel;
 		if(channel==-1) continue;
-		int program=s->midi->midi_channels[channel].program;
+		int program = s->midi->midi_channels[channel].program;
 		if(program==-1) continue;
 		//int inst_num=midi_programs[channel];
-		int inst_num=s->midi->midi_programs[program];
+		int inst_num = s->midi->midi_programs[program];
 		if(inst_num==-1) continue;
 		sid_instrument_t *instr=sid_instr[inst_num];
-		sample_t volume=((sample_t)s->midi->midi_keys[i]->velocity)/128.0;
+		sample_t volume = ((sample_t)s->midi->midi_keys[i]->velocity)/128.0;
 		for(j=0; j<nframes; j++) {
-			x=sid_buf[(i*nframes)+j];
-			sample_t a=((sample_t)x)/32768.0;
+			x = sid_buf[(i*nframes)+j];
+			sample_t a = ((sample_t)x)/32768.0;
 
 			if(!s->sid_bank->use_sid_volume) a*=volume;
 
@@ -96,10 +97,11 @@ void jack_shutdown(void *arg) {
 	struct super* s = (struct super*)arg;
 	printf("JACK client shutting down\n");
 	if(s->client) jack_client_close(s->client);
+	free(s);
 	exit(0);
 }
 
-void jack_connect_ports(jack_client_t *client, char** port_names) {
+void jack_connect_ports(jack_client_t *client, char port_names[][16]) {
 	int i;
 	char src_port[255];
 	for(i=0; jack_connect_args[i]; i++) {
@@ -122,18 +124,18 @@ int init_jack_audio(struct CHIPS* sid_bank, int use_sid_volume, struct midi_arra
 	if(client) jack_client_close(client);
 	if(sid_bank) sid_close(sid_bank);
 
-	client=jack_client_new(jclientname);
+	client = jack_client_open(jclientname,JackNullOption,NULL);
 	if (!client) {
 		fprintf(stderr, "Couldn't open connection to jack server\n");
 		pthread_mutex_unlock(&prefs_mutex);
 		return 0;
 	}
 
-	polyphony=new_polyphony;
+	sid_bank->polyphony=new_polyphony;//TODO: remove this
 
-	init_midi(polyphony);
+	init_midi(midi,sid_bank->polyphony);
 	prefs_read_instruments(instr_file);
-	sid_bank=sid_init(polyphony, use_sid_volume);
+	sid_bank=sid_init(sid_bank->polyphony, use_sid_volume);
 	
 	struct super *s = malloc(sizeof(struct super));
 	s->sid_bank = sid_bank;
@@ -142,9 +144,9 @@ int init_jack_audio(struct CHIPS* sid_bank, int use_sid_volume, struct midi_arra
 	jack_set_sample_rate_callback(client, srate, s);
 	jack_on_shutdown(client, jack_shutdown, s);
 
-	s->port_names[0]="audio_out_left";
+	strcpy(s->port_names[0],"audio_out_left");
 	s->output_port_l=jack_port_register(client, s->port_names[0], JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
-	s->port_names[1]="audio_out_right";
+	strcpy(s->port_names[1],"audio_out_right");
 	s->output_port_r=jack_port_register(client, s->port_names[1], JACK_DEFAULT_AUDIO_TYPE, JackPortIsOutput, 0);
 
 	if (jack_activate(client)) {
@@ -163,5 +165,6 @@ int init_jack_audio(struct CHIPS* sid_bank, int use_sid_volume, struct midi_arra
 	//while(1) sleep(1);
 	//jack_client_close(client);
 	//exit (0);
+	return 1;
 }
 

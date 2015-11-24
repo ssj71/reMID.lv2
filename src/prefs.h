@@ -1,3 +1,5 @@
+#ifndef PREFS_H
+#define PREFS_H
 
 #include <pthread.h>
 
@@ -31,3 +33,4 @@ void prefs_init();
 
 void prefs_read_instruments(char *path);
 
+#endif

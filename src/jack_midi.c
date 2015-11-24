@@ -19,7 +19,7 @@ jack_port_t *midi_port;
 void *midi_buf;
 jack_midi_event_t midi_event;
 
-jack_read_midi(jack_nframes_t nframes, struct midi_channel_state *midi_channels) {
+void jack_read_midi(jack_nframes_t nframes, struct midi_arrays *midi) {
 	jack_nframes_t i;
 
 	midi_buf=jack_port_get_buffer(midi_port, nframes);
@@ -36,49 +36,49 @@ jack_read_midi(jack_nframes_t nframes, struct midi_channel_state *midi_channels)
 
 		switch(ev_type) {
 			case SND_SEQ_EVENT_CONTROLLER:
-				if(!midi_channels[channel].in_use) break;
+				if(!midi->midi_channels[channel].in_use) break;
 				if(param==64) {
-					if(value>64) midi_channels[channel].sustain=1;
-					else midi_channels[channel].sustain=0;
+					if(value>64) midi->midi_channels[channel].sustain=1;
+					else midi->midi_channels[channel].sustain=0;
 				} else if(param==1) {
 					// modulation controlling vibrato: value=0-127
-					midi_channels[channel].vibrato=value;
+					midi->midi_channels[channel].vibrato=value;
 					//printf("%d\n", value);
-					midi_channels[channel].vibrato_changed=1;
+					midi->midi_channels[channel].vibrato_changed=1;
 				}
 				break;
 			// case SND_SEQ_EVENT_KEYPRESS:
 			case SND_SEQ_EVENT_CHANPRESS:
-				if(!midi_channels[channel].in_use) break;
-				midi_channels[channel].chanpress=value;
-				midi_channels[channel].chanpress_changed=1;
+				if(!midi->midi_channels[channel].in_use) break;
+				midi->midi_channels[channel].chanpress=value;
+				midi->midi_channels[channel].chanpress_changed=1;
 				break;
 			case SND_SEQ_EVENT_NOTEON:
-				if(!midi_channels[channel].in_use) break;
-				note_on(channel, param, value);
+				if(!midi->midi_channels[channel].in_use) break;
+				note_on(midi, channel, param, value);
 				break;
 			case SND_SEQ_EVENT_NOTEOFF:
-				if(!midi_channels[channel].in_use) break;
-				note_off(channel, param);
+				if(!midi->midi_channels[channel].in_use) break;
+				note_off(midi, channel, param);
 				break;
 			case SND_SEQ_EVENT_PITCHBEND:
 				// value=-8192 to +8191
-				if(!midi_channels[channel].in_use) break;
+				if(!midi->midi_channels[channel].in_use) break;
 				//int pitchbend=(value*128)|(param&0x7f);
 				int pitchbend=(((value&0x7f)<<7)|(param&0x7f))-8192;
 				//printf("got pitchbend %x %x: %x %d\n", param, value, pitchbend, pitchbend);
-				midi_channels[channel].pitchbend=pitchbend;
+				midi->midi_channels[channel].pitchbend=pitchbend;
 				break;
 			case SND_SEQ_EVENT_PGMCHANGE:
-				if(midi_channels[channel].program==-1) break;
+				if(midi->midi_channels[channel].program==-1) break;
 				//printf("prg change %d\n", value);
-				midi_channels[channel].program=param;
+				midi->midi_channels[channel].program=param;
 				break;
 		}
 	}
 }
 
-jack_midi_connect(char *port) {
+void jack_midi_connect(char *port) {
 	char dst_port[255];
 	snprintf(dst_port, 255, "%s:%s", jclientname, jmidi_portname);
 	printf("Connecting JACK MIDI port %s to %s\n", port, dst_port);
@@ -91,5 +91,6 @@ jack_midi_connect(char *port) {
 int jack_init_seq() {
 	fprintf(stderr, "Opening JACK MIDI port\n");
 	midi_port=jack_port_register(client, jmidi_portname, JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
+	return 0;
 }
 
