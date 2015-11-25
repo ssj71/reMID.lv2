@@ -29,6 +29,6 @@ void sid_close(struct CHIPS *chips);
 
 void sid_set_srate(struct CHIPS *chips, int pal, double sample_freq);
 
-short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_samples);
+short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument_t **sid_instr, int num_samples);
 
 #endif

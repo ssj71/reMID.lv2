@@ -116,7 +116,7 @@ void on_poly_update_clicked() {
 	pthread_mutex_lock(&prefs_mutex);
 	prefs_set_polyphony(newpoly);
 	pthread_mutex_unlock(&prefs_mutex);
-	init_jack_audio();
+	//init_jack_audio();
 	gtk_spin_button_set_value(poly_spinbutton, (guint)polyphony);
 }
 

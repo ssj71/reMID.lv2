@@ -11,52 +11,29 @@
 
 pthread_mutex_t prefs_mutex=PTHREAD_MUTEX_INITIALIZER;
 
-char *instr_file="instruments.conf";
+//char *instr_file="instruments.conf";
 
-int polyphony;
-int new_polyphony=16;
 
-int pal=1;
+//int pal=1;
 
-int pt_debug=0;
+//int pt_debug=0;
 
-int use_gui=1;
 //int use_sid_volume=0;
 
+//TODO: figure out what to do with these
 char *midi_connect_args[255];
 char *jack_connect_args[255];
 
-int num_instrs;
-sid_instrument_t **sid_instr=NULL;
+//int num_instrs;
+//sid_instrument_t **sid_instr=NULL;
 
-char *opnames[NUM_OPCODES] = {
-	[NOP]="nop",
-	[STOP]="stop",
-	[WAIT]="wait",
-	[GOTO]="goto",
-	[PRINT]="print",
-	[V1FREQ]="v1_freq", [V1FREQPCT]="v1_freq_pct", [V1FREQHS]="v1_freq_hs",
-	[V1PULSE]="v1_pulse",
-	[V1CONTROL]="v1_control", [V1AD]="v1_ad", [V1SR]="v1_sr",
-	[V2FREQ]="v2_freq", [V2FREQPCT]="v2_freq_pct", [V2FREQHS]="v2_freq_hs",
-	[V2PULSE]="v2_pulse",
-	[V2CONTROL]="v2_control", [V2AD]="v2_ad", [V2SR]="v2_sr",
-	[V3FREQ]="v3_freq", [V3FREQPCT]="v3_freq_pct", [V3FREQHS]="v3_freq_hs",
-	[V3PULSE]="v3_pulse",
-	[V3CONTROL]="v3_control", [V3AD]="v3_ad", [V3SR]="v3_sr",
-	[FILTER_CUTOFF]="filter_cutoff",
-	[FR_VIC]="fr_vic",
-	[FILTER_MODE]="filter_mode",
-	[V1PULSEMOD]="v1_pulsemod", [V2PULSEMOD]="v2_pulsemod", [V3PULSEMOD]="v3_pulsemod",
-	[V1GATE]="v1_gate", [V2GATE]="v2_gate", [V3GATE]="v3_gate",
-	[INVALID]=NULL
-};
 
 // requires init_jack_audio() to take effect
 void prefs_set_polyphony(int value) {
 	if(value<1) value=1;
 	else if(value>128) value=128;
-	new_polyphony=value;
+	//new_polyphony=value;
+	//TODO: need to pass to super object
 }
 
 void prefs_add_midi_connect(char *port) {
@@ -89,18 +66,41 @@ int readn(char *str) {
 	return strtol(str, (char **)NULL, 0);
 }
 
-void prefs_read_instruments(char *path) {
+sid_instrument_t** prefs_read_instruments(char *path) {
+	const char *opnames[NUM_OPCODES] = {
+		[NOP]="nop",
+		[STOP]="stop",
+		[WAIT]="wait",
+		[GOTO]="goto",
+		[PRINT]="print",
+		[V1FREQ]="v1_freq", [V1FREQPCT]="v1_freq_pct", [V1FREQHS]="v1_freq_hs",
+		[V1PULSE]="v1_pulse",
+		[V1CONTROL]="v1_control", [V1AD]="v1_ad", [V1SR]="v1_sr",
+		[V2FREQ]="v2_freq", [V2FREQPCT]="v2_freq_pct", [V2FREQHS]="v2_freq_hs",
+		[V2PULSE]="v2_pulse",
+		[V2CONTROL]="v2_control", [V2AD]="v2_ad", [V2SR]="v2_sr",
+		[V3FREQ]="v3_freq", [V3FREQPCT]="v3_freq_pct", [V3FREQHS]="v3_freq_hs",
+		[V3PULSE]="v3_pulse",
+		[V3CONTROL]="v3_control", [V3AD]="v3_ad", [V3SR]="v3_sr",
+		[FILTER_CUTOFF]="filter_cutoff",
+		[FR_VIC]="fr_vic",
+		[FILTER_MODE]="filter_mode",
+		[V1PULSEMOD]="v1_pulsemod", [V2PULSEMOD]="v2_pulsemod", [V3PULSEMOD]="v3_pulsemod",
+		[V1GATE]="v1_gate", [V2GATE]="v2_gate", [V3GATE]="v3_gate",
+		[INVALID]=NULL
+	};
 	GKeyFile *inst_config;
-	int i,j,k;
+	int i,j,k, num_instrs;
 	char *value;
 	GError *err;
+	sid_instrument_t** sid_instr;
 
 	inst_config=g_key_file_new();
 	i=g_key_file_load_from_file(inst_config, path,
 		G_KEY_FILE_KEEP_COMMENTS, NULL);
 	if(!i) {
 		printf("Error reading instrument config from %s\n", path);
-		return;
+		return 0;
 	}
 
 	// config groups
@@ -112,29 +112,6 @@ void prefs_read_instruments(char *path) {
 		if(!strcmp(groups[i], "channels")) continue;
 		if(!strcmp(groups[i], "programs")) continue;
 		num_instrs++;
-	}
-	if(sid_instr!=NULL) {
-		//printf("freeing memory\n");
-		for(i=0; sid_instr[i]; i++) {
-			sid_command_t *cmd=sid_instr[i]->sid_command_list;
-			sid_command_t *next;
-			while(cmd) {
-				next=cmd->next;
-				free(cmd);
-				cmd=next;
-			}
-
-			//if(cmd) {
-			//	sid_command_t *next;
-			//	do {
-			//		next=cmd->next;
-			//		free(cmd);
-			//	} while(next);
-			//}
-
-			free(sid_instr[i]);
-		}
-		free(sid_instr);
 	}
 	if(num_instrs) sid_instr=malloc(sizeof(sid_instrument_t *)*(num_instrs+1));
 	else {
@@ -390,5 +367,33 @@ void prefs_read_instruments(char *path) {
 			}
 		}
 	}
+	return sid_instr;
 }
 
+void close_instruments(sid_instrument_t ** sid_instr)
+{
+	int i;
+	if(sid_instr!=NULL) {
+		//printf("freeing memory\n");
+		for(i=0; sid_instr[i]; i++) {
+			sid_command_t *cmd=sid_instr[i]->sid_command_list;
+			sid_command_t *next;
+			while(cmd) {
+				next=cmd->next;
+				free(cmd);
+				cmd=next;
+			}
+
+			//if(cmd) {
+			//	sid_command_t *next;
+			//	do {
+			//		next=cmd->next;
+			//		free(cmd);
+			//	} while(next);
+			//}
+
+			free(sid_instr[i]);
+		}
+		free(sid_instr);
+	}
+}

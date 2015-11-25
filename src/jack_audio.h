@@ -3,13 +3,12 @@
 
 #include <jack/jack.h>
 #include "midi.h"
-typedef jack_default_audio_sample_t sample_t;
 #include "sid_chips.h" //this must appear out of order due to a circular dependency around the above typedef
 
+#define CLIENT_NAME "reMID"
+#define AUDIO_PORTNAME_L "audio_out_left"
+#define AUDIO_PORTNAME_R "audio_out_right"
 
-extern jack_client_t *client;
-extern char *jclientname;
-
-int init_jack_audio(struct CHIPS* sid_bank, int use_sid_volume, struct midi_arrays* midi);
+int init_jack_audio(int use_sid_volume, int max_polyphony, sid_instrument_t **sid_instr);
 
 #endif

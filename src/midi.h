@@ -3,6 +3,8 @@
 
 #include <jack/jack.h>
 
+#define MIDI_PORTNAME "MIDI_In"
+
 struct midi_key_state {
 	int last_used;
 	int needs_clearing;
@@ -38,6 +40,7 @@ struct midi_arrays {
 	int *free_voices;
 	int next_voice;
 	int voice_use_index;
+	void* seq;
 };
 /*
 extern struct midi_channel_state midi_channels[];
@@ -47,10 +50,11 @@ extern int midi_programs[];
 extern double note_frqs[];
 */
 
-int init_midi(struct midi_arrays* midi, int polyphony);
-void read_midi(jack_nframes_t nframes, struct midi_channel_state* midi_channels);
+int init_midi(struct midi_arrays* midi, jack_client_t* client, int polyphony);
+void read_midi(void* mseq, jack_nframes_t nframes, struct midi_channel_state* midi_channels);
 void note_on(struct midi_arrays* midi, int channel, int note, int velocity);
 void note_off(struct midi_arrays* midi, int channel, int note);
 void silence_all(struct midi_key_state **midi_keys);
+void midi_close(struct midi_arrays* midi, int polyphony);
 
 #endif

@@ -11,6 +11,10 @@
 #include "jack_audio.h"
 #include "prefs.h"
 
+#ifndef MAX_POLYPHONY
+#define MAX_POLYPHONY 32
+#endif
+
 void usage(char *prgname) {
 	printf("usage: %s [options...]\n\n"
 		"-h 			this help\n"
@@ -28,8 +32,9 @@ void usage(char *prgname) {
 }
 
 int main(int argc, char **argv) {
-	int c, use_sid_volume;
+	int c, use_sid_volume, max_poly=MAX_POLYPHONY;
 	pthread_t gui_thread;
+	int use_gui;
 
 	prefs_init();
 
@@ -51,7 +56,8 @@ int main(int argc, char **argv) {
 				use_gui=0;
 				break;
 			case 'p':
-				prefs_set_polyphony(atoi(optarg));
+				max_poly = atoi(optarg);
+				prefs_set_polyphony(max_poly);
 				break;
 			case 's':
 				if(atoi(optarg)) {
@@ -65,7 +71,11 @@ int main(int argc, char **argv) {
 		}
 	}
 
-	init_jack_audio(use_sid_volume);
+	if(max_poly > 128)
+			max_poly = 128;
+
+	//TODO: need to load instruments
+	init_jack_audio(&sid_bank, use_sid_volume, &midi, max_poly);
 
 #ifdef GUI
 	if(use_gui) {

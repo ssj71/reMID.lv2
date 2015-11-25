@@ -90,42 +90,44 @@ void note_off(struct midi_arrays* midi, int channel, int note) {
 	}
 }
 
-void read_midi(jack_nframes_t nframes, struct midi_channel_state* midi_channels) {
+void read_midi(void* seq, jack_nframes_t nframes, struct midi_channel_state* midi_channels) {
 #ifdef ALSA_MIDI
-	alsa_read_midi(midi);
+	alsa_read_midi(seq, midi);
 #endif
 #ifdef JACK_MIDI
-	jack_read_midi(nframes, midi);
+	jack_read_midi(seq, nframes, midi);
 #endif
 }
 
-int init_midi(struct midi_arrays* midi, int polyphony) {
+int init_midi(struct midi_arrays* midi, jack_client_t* client, int polyphony) {
 	int i;
 
 #ifdef ALSA_MIDI
-	if (!alsa_init_seq()) {
+	midi->seq = alsa_init_seq();
+	if (!midi->seq) {
 		fprintf(stderr, "ALSA MIDI initialisation error.\n");
 		//return 0;
 	}
 #endif
 
 #ifdef JACK_MIDI
-	if (!jack_init_seq()) {
-		fprintf(stderr, "ALSA MIDI initialisation error.\n");
+	midi->seq = jack_init_seq(client);
+	if (!midi->seq) {
+		fprintf(stderr, "JACK MIDI initialisation error.\n");
 	}
 #endif
 
 	for(i=0; midi_connect_args[i]; i++) {
 #ifdef ALSA_MIDI
-		int client=0;
+		int aclient=0;
 		int port=0;
-		sscanf(midi_connect_args[i], "%d:%d", &client, &port);
-		printf("Connecting ALSA MIDI input to %d:%d\n", client, port);
-		alsa_midi_connect(client, port);
+		sscanf(midi_connect_args[i], "%d:%d", &aclient, &port);
+		printf("Connecting ALSA MIDI input to %d:%d\n", aclient, port);
+		alsa_midi_connect(midi->seq, aclient, port);
 #endif
 #ifdef JACK_MIDI
 		//printf("Connecting JACK MIDI input to %d:%d\n", client, port);
-		jack_midi_connect(midi_connect_args[i]);
+		jack_midi_connect(client, midi_connect_args[i]);
 #endif
 	}
 
@@ -168,3 +170,16 @@ int init_midi(struct midi_arrays* midi, int polyphony) {
 	return 1;
 }
 
+void midi_close(struct midi_arrays* midi, int polyphony)
+{
+	int i;
+#if ALSA_MIDI
+	close_alsa(midi->seq);
+#endif
+	free(midi->seq);
+	for(i=0; i<polyphony; i++) {
+		free(midi->midi_keys[i]);
+	}
+	free(midi->midi_keys);
+	free(midi->free_voices);
+}

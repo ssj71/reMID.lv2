@@ -4,8 +4,8 @@
 #include <jack/jack.h>
 #include "midi.h"
 
-int jack_init_seq(void);
-void jack_midi_connect(char *port);
-void jack_read_midi(jack_nframes_t nframes, struct midi_arrays *midi);
+void* jack_init_seq(jack_client_t* client);
+void jack_midi_connect(jack_client_t* client, char *port);
+void jack_read_midi(void* mseq, jack_nframes_t nframes, struct midi_arrays *midi);
 
 #endif

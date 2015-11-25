@@ -2,24 +2,25 @@
 #include <alsa/asoundlib.h>
 
 #include "midi.h"
+#include "jack_audio.h"
 
-snd_seq_t *seq_handle=NULL;
-int in_port;
-int npfd;
-struct pollfd *pfd;
-
-char *clientname="reMID";
-char *portname="MIDI_In";
+struct amidi{
+	snd_seq_t *seq_handle;
+	int in_port;
+	int npfd;
+	struct pollfd *pfd;
+};
 
 //void alsa_read_midi(struct midi_channel_state* midi_channels) {
-void alsa_read_midi(struct midi_arrays* midi) {
+void alsa_read_midi(void* mseq, struct midi_arrays* midi) {
+	struct amidi* am = (struct amidi*)mseq;
 	snd_seq_event_t *ev;
 	int channel, param, value;
 
-	if(!poll(pfd, npfd, 0)) return;
+	if(!poll(am->pfd, am->npfd, 0)) return;
 
 	do {
-		snd_seq_event_input(seq_handle, &ev);
+		snd_seq_event_input(am->seq_handle, &ev);
 		switch(ev->type) {
 			case SND_SEQ_EVENT_CONTROLLER:
 				channel=ev->data.control.channel;
@@ -70,36 +71,45 @@ void alsa_read_midi(struct midi_arrays* midi) {
 				midi->midi_channels[channel].program=value;
 				break;
 		}
-	} while (snd_seq_event_input_pending(seq_handle, 0)>0);
+	} while (snd_seq_event_input_pending(am->seq_handle, 0)>0);
 }
 
-alsa_midi_connect(int client, int port) {
-	snd_seq_connect_from(seq_handle, 0, client, port);
+void alsa_midi_connect(void* mseq, int client, int port) {
+	struct amidi* am = (struct amidi*)mseq;
+	snd_seq_connect_from(am->seq_handle, 0, client, port);
 }
 
-int alsa_init_seq() {
-	if(seq_handle!=NULL) return 1;
+void* alsa_init_seq() {
+	struct amidi* am = (struct amidi*)malloc(sizeof(struct amidi));
 
-	if(snd_seq_open(&seq_handle, "default", SND_SEQ_OPEN_INPUT, 0)<0) {
+
+	if(snd_seq_open(&am->seq_handle, "default", SND_SEQ_OPEN_INPUT, 0)<0) {
 		fprintf(stderr, "Error opening ALSA sequencer.\n");
 		return 0;
 	}
 
-	snd_seq_set_client_name(seq_handle, clientname);
+	snd_seq_set_client_name(am->seq_handle, CLIENT_NAME);
 
-	in_port=snd_seq_create_simple_port(seq_handle, portname,
+	am->in_port = snd_seq_create_simple_port(am->seq_handle, MIDI_PORTNAME,
 		SND_SEQ_PORT_CAP_WRITE|SND_SEQ_PORT_CAP_SUBS_WRITE,
 		SND_SEQ_PORT_TYPE_APPLICATION);
 
-	if(in_port<0) {
+	if(am->in_port<0) {
 		fprintf(stderr, "Error creating sequencer port.\n");
 		return 0;
 	}
 
-	npfd=snd_seq_poll_descriptors_count(seq_handle, POLLIN);
-	pfd=(struct pollfd *)malloc(npfd*sizeof(struct pollfd));
-	snd_seq_poll_descriptors(seq_handle, pfd, npfd, POLLIN);
+	am->npfd = snd_seq_poll_descriptors_count(am->seq_handle, POLLIN);
+	am->pfd = (struct pollfd *)malloc(am->npfd*sizeof(struct pollfd));
+	snd_seq_poll_descriptors(am->seq_handle, am->pfd, am->npfd, POLLIN);
 
-	return 1;
+	return (void*)am;
+}
+
+void close_alsa(void* mseq)
+{
+	struct amidi* am = (struct amidi*)mseq;
+	free(am->pfd);
+	//am is freed by calling function
 }
 

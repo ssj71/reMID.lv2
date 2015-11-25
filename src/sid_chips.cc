@@ -83,7 +83,7 @@ void sid_set_srate(struct CHIPS *chips, int pal, double srate) {
 	}
 }
 
-void table_clock(struct CHIPS *chips, int chip_num) {
+void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int pt_debug) {
 	sid_table_state_t *tab=chips->table_states[chip_num];
 
 	// pulse mods
@@ -108,8 +108,6 @@ void table_clock(struct CHIPS *chips, int chip_num) {
 		return;
 	}
 
-	//TODO: there must be a global array of instruments :(
-	sid_instrument_t *instr=sid_instr[tab->inst_num];
 	
 	sid_command_t *cmd=instr->sid_command_list;
 	int state_changed=0;
@@ -328,15 +326,13 @@ void table_clock(struct CHIPS *chips, int chip_num) {
 	tab->pc++;
 }
 
-//TODO: Why is this not in the midi section?
 void clear_key(midi_key_state** midi_keys, int key) {
-	//TODO: another global (midi keys)
 	midi_keys[key]->note_on=0;
 	midi_keys[key]->note_state_changed=0;
 }
 
 extern "C"
-short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_samples) {
+short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument_t** sid_instr, int num_samples) {
     //TODO: Remove Mallocs into init (polyphony can be bound)
 	if((sizeof(short)*num_samples*chips->polyphony)>chips->buf_length) {
 		chips->buf_length=sizeof(short)*num_samples*chips->polyphony;
@@ -549,7 +545,7 @@ short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_sample
 
 		// vibrato control 0-127
 		// TODO fix return to zero
-		if(midi->midi_channels[channel].vibrato_changed) {//TODO: midi globals
+		if(midi->midi_channels[channel].vibrato_changed) {
 			int vibrato=midi->midi_channels[channel].vibrato;
 			if(!vibrato) midi->midi_channels[channel].vibrato_changed=0;
 
@@ -584,7 +580,7 @@ short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, int num_sample
 
 		// process table
 		while((!tab->stopped) && time_now>=tab->next_tick) {
-			table_clock(chips, i);
+			table_clock(chips, instr, i, 0);//TODO: get pt_debug from prefs
 			int speed=instr->program_speed;
 			tab->next_tick+=(1000000/speed);
 		}

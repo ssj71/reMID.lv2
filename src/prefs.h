@@ -2,13 +2,14 @@
 #define PREFS_H
 
 #include <pthread.h>
+#include "sid_instr.h"
 
 extern pthread_mutex_t prefs_mutex;
 
 extern char *instr_file;
 
 //extern int polyphony;
-extern int new_polyphony;
+//extern int new_polyphony;
 
 extern int pal;
 
@@ -31,6 +32,7 @@ void prefs_set_polyphony(int value);
 
 void prefs_init();
 
-void prefs_read_instruments(char *path);
+sid_instrument_t** prefs_read_instruments(char *path);
+void close_instruments(sid_instrument_t ** sid_instr);
 
 #endif

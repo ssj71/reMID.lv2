@@ -1,7 +1,8 @@
 #ifndef SID_INSTRUMENT_H
 #define SID_INSTRUMENT_H
-#include "jack_audio.h"
+#include <jack/jack.h>
 
+typedef jack_default_audio_sample_t sample_t;
 
 enum OPCODES { 
 	NOP=0, 
@@ -75,7 +76,6 @@ typedef struct sid_instrument {
 	char *percussion_mapn[128];	// names of percussion instruments
 
 } sid_instrument_t;
-extern sid_instrument_t **sid_instr;
 
 typedef struct sid_table_state {
 	jack_time_t next_tick;
@@ -117,6 +117,5 @@ typedef struct sid_table_state {
 
 	int pitchbend;
 } sid_table_state_t;
-extern sid_table_state_t **sid_table_states;
 
 #endif
