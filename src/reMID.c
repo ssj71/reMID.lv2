@@ -15,10 +15,18 @@
 #define MAX_POLYPHONY 32
 #endif
 
+void add_connect(char** connect_args, char *port) {
+	int i;
+	for(i=0; connect_args[i]; i++);
+	strcpy(connect_args[i++], port);
+	connect_args[i]=NULL;
+}
+
 void usage(char *prgname) {
 	printf("usage: %s [options...]\n\n"
 		"-h 			this help\n"
 		"-d			debug program table execution\n"
+		"-i	<path>	select instrument configuration file\n"
 		"-j <client:port>	connect audio output to JACK port, may be specified multiple times\n"
 		"-m <client:port>	connect MIDI input to output from client:port\n"
 #ifdef GUI
@@ -35,8 +43,10 @@ int main(int argc, char **argv) {
 	int c, use_sid_volume, max_poly=MAX_POLYPHONY;
 	pthread_t gui_thread;
 	int use_gui;
-
-	prefs_init();
+	int pt_debug;
+	char *midi_connect_args[255];
+	char *jack_connect_args[255];
+	char *instr_file = NULL;
 
 	while((c=getopt(argc, argv, "dhj:m:np:s:"))!=-1) {
 		switch (c) {
@@ -47,17 +57,19 @@ int main(int argc, char **argv) {
 				usage(argv[0]);
 				break;
 			case 'j':
-				prefs_add_jack_connect(optarg);
+				add_connect(jack_connect_args,optarg);
 				break;
 			case 'm':
-				prefs_add_midi_connect(optarg);
+				add_connect(midi_connect_args,optarg);
 				break;
 			case 'n':
 				use_gui=0;
 				break;
 			case 'p':
 				max_poly = atoi(optarg);
-				prefs_set_polyphony(max_poly);
+				break;
+			case 'i':
+				instr_file = optarg;
 				break;
 			case 's':
 				if(atoi(optarg)) {
@@ -71,11 +83,14 @@ int main(int argc, char **argv) {
 		}
 	}
 
+	if(max_poly < 1)
+		max_poly = 1;
 	if(max_poly > 128)
-			max_poly = 128;
+		max_poly = 128;
 
-	//TODO: need to load instruments
-	init_jack_audio(&sid_bank, use_sid_volume, &midi, max_poly);
+	//TODO: need to probably load instruments after super object is created
+
+	init_jack_audio(use_sid_volume, max_poly, jack_connect_args, midi_connect_args, instr_file);
 
 #ifdef GUI
 	if(use_gui) {

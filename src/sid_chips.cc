@@ -34,8 +34,8 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	for(i=0; i<polyphony; i++) {
 		self->sid_chips[i]=new SID();
 
-		//sid_chips[i]->set_chip_model(MOS6581);
-		self->sid_chips[i]->set_chip_model(MOS8580);
+		self->sid_chips[i]->set_chip_model(MOS6581);
+		//self->sid_chips[i]->set_chip_model(MOS8580);
 		self->sid_chips[i]->reset();
 		
 		// initialise SID volume to max if we're not doing volume at the SID level
@@ -71,11 +71,11 @@ void sid_set_srate(struct CHIPS *chips, int pal, double srate) {
 	if(pal) chips->clock_freq=985248;
 	else chips->clock_freq=1022730;
 	chips->freq_mult=chips->clock_freq/16777216.0;
-	printf("%s mode: clock frequency %.2f, frequency multiplier %f\n", (pal?"PAL":"NTSC"), chips->clock_freq, freq_mult);
+	printf("%s mode: clock frequency %.2f, frequency multiplier %f\n", (pal?"PAL":"NTSC"), chips->clock_freq, chips->freq_mult);
 
 	chips->clocks_per_sample=chips->clock_freq/chips->sample_freq;
 
-	for(i=0; chips[i]; i++) {
+	for(i=0; chips->sid_chips[i]; i++) {
 		//printf("setting sid sample frequency to %f\n", sample_freq);
 		chips->sid_chips[i]->set_sampling_parameters(chips->clock_freq, SAMPLE_FAST, chips->sample_freq);
 		//chips[i]->set_sampling_parameters(clock_freq, SAMPLE_INTERPOLATE, sample_freq);
@@ -332,7 +332,7 @@ void clear_key(midi_key_state** midi_keys, int key) {
 }
 
 extern "C"
-short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument_t** sid_instr, int num_samples) {
+short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples) {
     //TODO: Remove Mallocs into init (polyphony can be bound)
 	if((sizeof(short)*num_samples*chips->polyphony)>chips->buf_length) {
 		chips->buf_length=sizeof(short)*num_samples*chips->polyphony;
@@ -453,6 +453,7 @@ short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument
 				sid->write(0x16, instr->filter_cutoff>>8);
 				sid->write(0x17, instr->fr_vic);
 
+				//now get rest of table ready for commands
 				if(chips->use_sid_volume) {
 					int vol=midi->midi_keys[i]->velocity/8;
 					tab->vol=vol;

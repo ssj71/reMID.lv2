@@ -17,7 +17,7 @@
 #include "prefs.h"
 
 
-void silence_all(struct midi_key_state **midi_keys) {
+void silence_all(midi_key_state_t **midi_keys) {
 	int i;
 	for(i=0; midi_keys[i]; i++) {
 		midi_keys[i]->note_on=0;
@@ -26,7 +26,7 @@ void silence_all(struct midi_key_state **midi_keys) {
 	}
 }
 
-void find_next_voice(struct midi_key_state **midi_keys, int* free_voices, int* next_voice, int* voice_use_index) {
+void find_next_voice(midi_key_state_t **midi_keys, int* free_voices, int* next_voice, int* voice_use_index) {
 	int i,j;
 	int needs_clearing=0;
 
@@ -57,7 +57,7 @@ void find_next_voice(struct midi_key_state **midi_keys, int* free_voices, int* n
 	midi_keys[*next_voice]->needs_clearing=needs_clearing;
 }
 
-void note_on(struct midi_arrays* midi, int channel, int note, int velocity) {
+void note_on(midi_arrays_t* midi, int channel, int note, int velocity) {
 	if(!midi->midi_channels[channel].in_use) return;
 	int program=midi->midi_channels[channel].program;
 	if(program==-1) return;
@@ -74,7 +74,7 @@ void note_on(struct midi_arrays* midi, int channel, int note, int velocity) {
 	midi->midi_channels[channel].last_velocity=velocity;
 }
 
-void note_off(struct midi_arrays* midi, int channel, int note) {
+void note_off(midi_arrays_t* midi, int channel, int note) {
 	if(!midi->midi_channels[channel].in_use) return;
 	int program=midi->midi_channels[channel].program;
 	if(program==-1) return;
@@ -90,7 +90,7 @@ void note_off(struct midi_arrays* midi, int channel, int note) {
 	}
 }
 
-void read_midi(void* seq, jack_nframes_t nframes, struct midi_channel_state* midi_channels) {
+void read_midi(void* seq, jack_nframes_t nframes, midi_arrays_t* midi) {
 #ifdef ALSA_MIDI
 	alsa_read_midi(seq, midi);
 #endif
@@ -99,7 +99,7 @@ void read_midi(void* seq, jack_nframes_t nframes, struct midi_channel_state* mid
 #endif
 }
 
-int init_midi(struct midi_arrays* midi, jack_client_t* client, int polyphony) {
+int init_midi(midi_arrays_t* midi, jack_client_t* client, int polyphony, char** midi_connect_args) {
 	int i;
 
 #ifdef ALSA_MIDI
@@ -138,9 +138,9 @@ int init_midi(struct midi_arrays* midi, jack_client_t* client, int polyphony) {
 		free(midi->midi_keys);
 	}
 
-	midi->midi_keys=malloc(sizeof(struct midi_key_state *)*(polyphony+1));
+	midi->midi_keys=malloc(sizeof(midi_key_state_t *)*(polyphony+1));
 	for(i=0; i<polyphony; i++) {
-		midi->midi_keys[i]=malloc(sizeof(struct midi_key_state));
+		midi->midi_keys[i]=malloc(sizeof(midi_key_state_t));
 		midi->midi_keys[i]->channel=-1;
 		midi->midi_keys[i]->note_on=0;
 		midi->midi_keys[i]->note_state_changed=0;
@@ -170,7 +170,7 @@ int init_midi(struct midi_arrays* midi, jack_client_t* client, int polyphony) {
 	return 1;
 }
 
-void midi_close(struct midi_arrays* midi, int polyphony)
+void midi_close(midi_arrays_t* midi, int polyphony)
 {
 	int i;
 #if ALSA_MIDI

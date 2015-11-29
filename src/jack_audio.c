@@ -31,7 +31,7 @@ int process(jack_nframes_t nframes, void *arg) {
 
 	pthread_mutex_lock(&prefs_mutex);//TODO: no mutexes in RT
 
-	read_midi(s->midi->seq,nframes, s->midi->midi_channels);
+	read_midi(s->midi->seq,nframes, s->midi);
 
 	sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
 	for(i=0; i<nframes; i++) outl[i]=0.0;
@@ -94,7 +94,7 @@ void jack_shutdown(void *arg) {
 	exit(0);
 }
 
-void jack_connect_ports(jack_client_t *client, char port_names[][16]) {
+void jack_connect_ports(jack_client_t *client, char port_names[][16], char** jack_connect_args) {
 	int i;
 	char src_port[255];
 	for(i=0; jack_connect_args[i]; i++) {
@@ -109,7 +109,7 @@ void jack_connect_ports(jack_client_t *client, char port_names[][16]) {
 	}
 }
 
-int init_jack_audio( int use_sid_volume, int max_polyphony, sid_instrument_t** sid_instr) {
+int init_jack_audio( int use_sid_volume, int max_polyphony, char** jack_connect_args, char** midi_connect_args, char* instr_file) {
 
 	pthread_mutex_lock(&prefs_mutex);
 	struct super *s = malloc(sizeof(struct super));
@@ -121,11 +121,18 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, sid_instrument_t** s
 		return 0;
 	}
 
-	//TODO: need mechanism to set current polyphony
+	//TODO: need mechanism to set current polyphony (allows easy on the CPU)
 	s->sid_bank->polyphony=max_polyphony;
 
-	init_midi(s->midi, s->client, s->sid_bank->polyphony);
-	s->sid_instr = sid_instr;
+	init_midi(s->midi, s->client, s->sid_bank->polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
+
+	//load instruments
+	s->sid_instr = NULL;
+	if(instr_file)
+		s->sid_instr = read_instruments(instr_file, s->midi);
+	if(!s->sid_instr)
+		s->sid_instr = default_instrument();
+
 	s->sid_bank = sid_init(s->sid_bank->polyphony, use_sid_volume);
 	
 	jack_set_process_callback(s->client, process, s);
@@ -143,7 +150,7 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, sid_instrument_t** s
 		return 0;
 	}
 
-	jack_connect_ports(s->client, s->port_names);
+	jack_connect_ports(s->client, s->port_names, jack_connect_args);
 
 	pthread_mutex_unlock(&prefs_mutex);
 

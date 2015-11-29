@@ -12,7 +12,7 @@ struct amidi{
 };
 
 //void alsa_read_midi(struct midi_channel_state* midi_channels) {
-void alsa_read_midi(void* mseq, struct midi_arrays* midi) {
+void alsa_read_midi(void* mseq, midi_arrays_t* midi) {
 	struct amidi* am = (struct amidi*)mseq;
 	snd_seq_event_t *ev;
 	int channel, param, value;

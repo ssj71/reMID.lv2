@@ -176,7 +176,7 @@ void init_chan_lists() {
 
 void reload_instruments() {
 	pthread_mutex_lock(&prefs_mutex);
-	prefs_read_instruments(instr_file);
+	read_instruments(instr_file);
 	pthread_mutex_unlock(&prefs_mutex);
 	clear_chan_lists();
 	init_chan_lists();

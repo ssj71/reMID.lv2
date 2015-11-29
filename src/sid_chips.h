@@ -23,12 +23,18 @@ struct CHIPS
     sid_table_state_t **table_states;
 };
 
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 struct CHIPS *sid_init(int polyphony, int use_sid_volume);
-
 void sid_close(struct CHIPS *chips);
-
 void sid_set_srate(struct CHIPS *chips, int pal, double sample_freq);
-
 short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument_t **sid_instr, int num_samples);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif

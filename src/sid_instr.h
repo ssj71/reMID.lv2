@@ -4,6 +4,7 @@
 
 typedef jack_default_audio_sample_t sample_t;
 
+//TODO: add detune (.1 cents ) and env3toFilter and osc3toFitler
 enum OPCODES { 
 	NOP=0, 
 	STOP,

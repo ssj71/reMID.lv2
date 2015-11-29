@@ -19,7 +19,7 @@ struct jmidi{
 	jack_midi_event_t midi_event;
 };
 
-void jack_read_midi(void* mseq, jack_nframes_t nframes, struct midi_arrays *midi) {
+void jack_read_midi(void* mseq, jack_nframes_t nframes, midi_arrays_t *midi) {
 	jack_nframes_t i;
 	struct jmidi* jm = (struct jmidi*)mseq;
 

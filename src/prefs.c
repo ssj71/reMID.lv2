@@ -21,8 +21,6 @@ pthread_mutex_t prefs_mutex=PTHREAD_MUTEX_INITIALIZER;
 //int use_sid_volume=0;
 
 //TODO: figure out what to do with these
-char *midi_connect_args[255];
-char *jack_connect_args[255];
 
 //int num_instrs;
 //sid_instrument_t **sid_instr=NULL;
@@ -36,25 +34,6 @@ void prefs_set_polyphony(int value) {
 	//TODO: need to pass to super object
 }
 
-void prefs_add_midi_connect(char *port) {
-	int i;
-	for(i=0; midi_connect_args[i]; i++);
-	midi_connect_args[i++]=port;
-	midi_connect_args[i]=NULL;
-}
-
-void prefs_add_jack_connect(char *port) {
-	int i;
-	for(i=0; jack_connect_args[i]; i++);
-	jack_connect_args[i++]=port;
-	jack_connect_args[i]=NULL;
-}
-
-void prefs_init() {
-	midi_connect_args[0]=NULL;
-	jack_connect_args[0]=NULL;
-}
-
 int readn(char *str) {
 	//int i;
 	//while(isspace(*str)) str++;
@@ -66,7 +45,53 @@ int readn(char *str) {
 	return strtol(str, (char **)NULL, 0);
 }
 
-sid_instrument_t** prefs_read_instruments(char *path) {
+sid_instrument_t** default_instrument()
+{
+	sid_instrument_t** sid_instr;
+	sid_instr = malloc(sizeof(sid_instrument_t *));
+	sid_instr[0] = malloc(sizeof(sid_instrument_t));
+
+	sid_instr[0]->name = malloc(sizeof(char)*8);
+	strcpy(sid_instr[0]->name,"default");
+	sid_instr[0]->description = sid_instr[0]->name;
+
+	// defaults
+	sid_instr[0]->vol_left=1.0;
+	sid_instr[0]->vol_right=1.0;
+	sid_instr[0]->panning=0;
+	sid_instr[0]->program_speed=50.0;
+	//sid_instr[j]->sid_commands[0].opcode=STOP;
+	sid_instr[0]->sid_command_list=NULL;
+	sid_instr[0]->type=NORMAL;
+
+	sid_instr[0]->v1_freq = 0;
+	sid_instr[0]->v1_pulse = 0;
+	sid_instr[0]->v1_control = 0;
+	sid_instr[0]->v1_ad = 0;
+	sid_instr[0]->v1_sr = 0;
+
+	sid_instr[0]->v2_freq = 0;
+	sid_instr[0]->v2_pulse = 0;
+	sid_instr[0]->v2_control = 0;
+	sid_instr[0]->v2_ad = 0;
+	sid_instr[0]->v2_sr = 0;
+
+	sid_instr[0]->v3_freq = 0;
+	sid_instr[0]->v3_pulse = 0;
+	sid_instr[0]->v3_control = 0;
+	sid_instr[0]->v3_ad = 0;
+	sid_instr[0]->v3_sr = 0;
+
+	sid_instr[0]->filter_cutoff = 0;
+	sid_instr[0]->fr_vic = 0;
+	sid_instr[0]->filter_mode = 0;
+
+	//TODO: some commands to allow detune
+
+	return sid_instr;
+}
+
+sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi) {
 	const char *opnames[NUM_OPCODES] = {
 		[NOP]="nop",
 		[STOP]="stop",
@@ -133,6 +158,7 @@ sid_instrument_t** prefs_read_instruments(char *path) {
 		sid_instr[j]->description="";
 		sid_instr[j]->vol_left=1.0;
 		sid_instr[j]->vol_right=1.0;
+		sid_instr[j]->panning=0;//1 makes higher notes sound more in r channel lower more in l channel
 		sid_instr[j]->program_speed=50.0;
 		//sid_instr[j]->sid_commands[0].opcode=STOP;
 		sid_instr[j]->sid_command_list=NULL;
@@ -314,7 +340,7 @@ sid_instrument_t** prefs_read_instruments(char *path) {
 	gchar **programs=g_key_file_get_keys(inst_config, "programs", NULL, &err);
 	if(programs) {
 		for(i=0; i<128; i++) {
-			midi_programs[i]=-1;
+			midi->midi_programs[i]=-1;
 			char prg_str[255];
 			snprintf(prg_str, 255, "%d", i+1);
 			err=NULL;
@@ -322,7 +348,7 @@ sid_instrument_t** prefs_read_instruments(char *path) {
 			if(value) {
 				for(j=0; sid_instr[j]; j++) {
 					if(!strcmp(sid_instr[j]->name, value)) {
-						midi_programs[i]=j;
+						midi->midi_programs[i]=j;
 						//printf("midi program %d: %d\n", i, j);
 						break;
 					}
@@ -337,8 +363,8 @@ sid_instrument_t** prefs_read_instruments(char *path) {
 	gchar **channels=g_key_file_get_keys(inst_config, "channels", NULL, &err);
 	if(channels) {
 		for(i=0; i<16; i++) {
-			midi_channels[i].in_use=0;
-			midi_channels[i].program=-1;
+			midi->midi_channels[i].in_use=0;
+			midi->midi_channels[i].program=-1;
 			char chan_str[255];
 			snprintf(chan_str, 255, "%d", i+1);
 			err=NULL;
@@ -346,8 +372,8 @@ sid_instrument_t** prefs_read_instruments(char *path) {
 			if(value) {
 				int ivalue=atoi(value)-1;
 				if(ivalue<=127) {
-					midi_channels[i].program=ivalue;
-					midi_channels[i].in_use=1;
+					midi->midi_channels[i].program=ivalue;
+					midi->midi_channels[i].in_use=1;
 					//printf("channel %d: %d\n", i, ivalue-1);
 				}
 			}
