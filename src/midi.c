@@ -99,8 +99,9 @@ void read_midi(void* seq, jack_nframes_t nframes, midi_arrays_t* midi) {
 #endif
 }
 
-int init_midi(midi_arrays_t* midi, jack_client_t* client, int polyphony, char** midi_connect_args) {
+midi_arrays_t* init_midi(jack_client_t* client, int polyphony, char** midi_connect_args) {
 	int i;
+	midi_arrays_t* midi = malloc(sizeof(midi_arrays_t));
 
 #ifdef ALSA_MIDI
 	midi->seq = alsa_init_seq();
@@ -131,12 +132,15 @@ int init_midi(midi_arrays_t* midi, jack_client_t* client, int polyphony, char** 
 #endif
 	}
 
-	if(midi->midi_keys!=NULL) {
+	/*for reinit
+	if(midi->midi_keys[0]!=NULL) {
 		for(i=0; midi->midi_keys[i]; i++) {
 			free(midi->midi_keys[i]);
 		}
 		free(midi->midi_keys);
 	}
+	if(midi->free_voices!=NULL) free(midi->free_voices);
+	*/
 
 	midi->midi_keys=malloc(sizeof(midi_key_state_t *)*(polyphony+1));
 	for(i=0; i<polyphony; i++) {
@@ -148,7 +152,6 @@ int init_midi(midi_arrays_t* midi, jack_client_t* client, int polyphony, char** 
 		midi->midi_keys[i]->needs_clearing=0;
 	}
 	midi->midi_keys[i]=NULL;
-	if(midi->free_voices!=NULL) free(midi->free_voices);
 	midi->free_voices=malloc(sizeof(int)*(polyphony+1));
 	midi->next_voice = 0;
 	midi->voice_use_index = 0;
@@ -167,7 +170,7 @@ int init_midi(midi_arrays_t* midi, jack_client_t* client, int polyphony, char** 
 	// calculate midi note frequencies
 	for(i=0; i<128; i++) midi->note_frqs[i]=440.0*pow(2,((double)i-69.0)/12.0);
 
-	return 1;
+	return midi;
 }
 
 void midi_close(midi_arrays_t* midi, int polyphony)

@@ -57,6 +57,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	//cout << polyphony << " reSID chip polyphony system\n";
 	printf("%i reSID chip polyphony system\n", polyphony);
 
+	//TODO: need mechanism to set current polyphony (allows easy on the CPU)
     self->polyphony=polyphony;
 
 	return self;

@@ -1,7 +1,12 @@
+This is a MIDI implementation of a MOS6581 SID chip using the reSID library. It includes support for scripted instruments that allow complex sonic control of the chip.
 
-Type make to build, then run reMID from this directory.
+Dependencies:
+libglib-2.0
+libjack-dev
+resid
 
-Run reMID -h for help.
+resid can be downloaded and installed from http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html
+
 
 See instruments.conf for instrument parameters.
 

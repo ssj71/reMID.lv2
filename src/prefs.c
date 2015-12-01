@@ -45,6 +45,7 @@ int readn(char *str) {
 	return strtol(str, (char **)NULL, 0);
 }
 
+//TODO: still need to do some malloc of instruments (or probably shoud rather move malloc to the midi init)
 sid_instrument_t** default_instrument()
 {
 	sid_instrument_t** sid_instr;

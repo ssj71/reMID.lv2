@@ -46,7 +46,9 @@ int main(int argc, char **argv) {
 	int pt_debug;
 	char *midi_connect_args[255];
 	char *jack_connect_args[255];
-	char *instr_file = NULL;
+	char *instr_file = "instruments.conf";
+	jack_connect_args[0] = NULL;
+	midi_connect_args[0] = NULL;
 
 	while((c=getopt(argc, argv, "dhj:m:np:s:"))!=-1) {
 		switch (c) {
@@ -87,8 +89,6 @@ int main(int argc, char **argv) {
 		max_poly = 1;
 	if(max_poly > 128)
 		max_poly = 128;
-
-	//TODO: need to probably load instruments after super object is created
 
 	init_jack_audio(use_sid_volume, max_poly, jack_connect_args, midi_connect_args, instr_file);
 

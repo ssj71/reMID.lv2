@@ -99,7 +99,7 @@ void jack_connect_ports(jack_client_t *client, char port_names[][16], char** jac
 	char src_port[255];
 	for(i=0; jack_connect_args[i]; i++) {
 		char *port=jack_connect_args[i];
-		snprintf(src_port, 255, "%s:%s", CLIENT_NAME, port_names[i%2]);
+		sprintf(src_port, "%s:%s", CLIENT_NAME, port_names[i%2]);
 		printf("Connecting JACK audio port to %s\n", port);
 		if(jack_connect(client, src_port, port)) {
 			printf("Error connecting to JACK port %s\n", port);
@@ -121,19 +121,20 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, char** jack_connect_
 		return 0;
 	}
 
-	//TODO: need mechanism to set current polyphony (allows easy on the CPU)
-	s->sid_bank->polyphony=max_polyphony;
 
-	init_midi(s->midi, s->client, s->sid_bank->polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
+	s->midi = init_midi(s->client, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
 
-	//load instruments
+	//load instrument //TODO: make a "find file" function
 	s->sid_instr = NULL;
 	if(instr_file)
 		s->sid_instr = read_instruments(instr_file, s->midi);
+	else
+		s->sid_instr = read_instruments("instruments.conf", s->midi);
 	if(!s->sid_instr)
 		s->sid_instr = default_instrument();
 
-	s->sid_bank = sid_init(s->sid_bank->polyphony, use_sid_volume);
+
+	s->sid_bank = sid_init(max_polyphony, use_sid_volume);
 	
 	jack_set_process_callback(s->client, process, s);
 	jack_set_sample_rate_callback(s->client, srate, s);
