@@ -9,6 +9,6 @@
 #define AUDIO_PORTNAME_L "audio_out_left"
 #define AUDIO_PORTNAME_R "audio_out_right"
 
-int init_jack_audio(int use_sid_volume, int max_polyphony, char** jack_connect_args, char** midi_connect_args, char* instr_file);
+int init_jack_audio(int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file);
 
 #endif
