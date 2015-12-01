@@ -60,6 +60,10 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume) {
 	//TODO: need mechanism to set current polyphony (allows easy on the CPU)
     self->polyphony=polyphony;
 
+	self->buf_length = sizeof(short)*8192*self->polyphony;
+	self->buf = (short *)malloc(self->buf_length);
+	printf("%d bytes free in SID output buffer\n", self->buf_length);
+
 	return self;
 }
 
@@ -334,13 +338,6 @@ void clear_key(midi_key_state** midi_keys, int key) {
 
 extern "C"
 short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples) {
-    //TODO: Remove Mallocs into init (polyphony can be bound)
-	if((sizeof(short)*num_samples*chips->polyphony)>chips->buf_length) {
-		chips->buf_length=sizeof(short)*num_samples*chips->polyphony;
-		if(chips->buf!=NULL) free(chips->buf);
-		chips->buf=(short *)malloc(chips->buf_length);
-		printf("%d bytes free in SID output buffer\n", chips->buf_length);
-	}
 
 	jack_time_t time_now=jack_get_time();
 	int i;
