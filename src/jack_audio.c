@@ -31,14 +31,16 @@ int process(jack_nframes_t nframes, void *arg)
 
     struct super* s = (struct super*)arg;
 
-    pthread_mutex_lock(&prefs_mutex);//TODO: no mutexes in RT
 
     read_midi(s->midi->seq,nframes, s->midi);
 
     sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
-    for(i=0; i<nframes; i++) outl[i] = 0.0;
     sample_t *outr = (sample_t *)jack_port_get_buffer(s->output_port_r, nframes);
-    for(i=0; i<nframes; i++) outr[i] = 0.0;
+    for(i=0; i<nframes; i++)
+    {
+    	outr[i] = 0.0;
+		outl[i] = 0.0;
+    }
 
     short *sid_buf = sid_process(s->sid_bank, s->midi, s->sid_instr, (int)nframes);
     for(i=0; i<s->sid_bank->polyphony; i++)
@@ -78,7 +80,6 @@ int process(jack_nframes_t nframes, void *arg)
         }
     }
     //printf("low: %d, high: %d\n", low, high);
-    pthread_mutex_unlock(&prefs_mutex);//TODO: big no-no here
     return 0;
 }
 
@@ -124,14 +125,12 @@ void jack_connect_ports(jack_client_t *client, char port_names[][16], char** jac
 int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file)
 {
 
-    pthread_mutex_lock(&prefs_mutex);
     struct super *s = malloc(sizeof(struct super));
 
     s->client = jack_client_open(CLIENT_NAME,JackNullOption,NULL);
     if (!s->client)
     {
         fprintf(stderr, "Couldn't open connection to jack server\n");
-        pthread_mutex_unlock(&prefs_mutex);
         return 0;
     }
 
@@ -159,13 +158,11 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
     if (jack_activate(s->client))
     {
         fprintf(stderr, "Cannot activate client");
-        pthread_mutex_unlock(&prefs_mutex);
         return 0;
     }
 
     jack_connect_ports(s->client, s->port_names, jack_connect_args);
 
-    pthread_mutex_unlock(&prefs_mutex);
 
     printf("\nREADY.\n");
 

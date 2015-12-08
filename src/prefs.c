@@ -9,7 +9,7 @@
 #include "sid_instr.h"
 #include "midi.h"
 
-pthread_mutex_t prefs_mutex = PTHREAD_MUTEX_INITIALIZER;
+//pthread_mutex_t prefs_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //char *instr_file="instruments.conf";
 
