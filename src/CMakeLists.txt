@@ -35,6 +35,7 @@ link_directories ( ${JACK_LIBRARY_DIRS} ${GLIB_LIBRARY_DIRS})
 
 add_definitions(-DJACK_MIDI)
 
+#I can't get the UI to work (glade version too old)
 #if(GTK2_FOUND)
 #   include_directories(${GTK2_INCLUDE_DIRS})
 #   #add_executable(mygui mygui.cc)

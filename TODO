@@ -1,0 +1,43 @@
+add manual mode (no instruments)
+make polyphony selectable
+new GUI
+add circular buffer to change instrument collection
+LV2-ize
+add env3tofilter opcode
+add osc3tofilter opcode
+add opcodes for voice detune (is freq. resolution fine enough?)
+
+
+
+__GUI__
+polyphony,
+gain? (not unless its already there)
+
+instrument mode:
+instruments file
+instruments
+current instrument
+reload instrument
+
+manual mode: 
+per voice:
+ detune
+ pw (12 bit)
+ wave (noise, square, saw, tri, ring mod, off)
+ sync (1 bit)
+ filter (or bypass) (1 bit)
+ A (4 bit)
+ D (4 bit)
+ S (4 bit)
+ R (4 bit)
+voice 3 silent (1 bit)
+filter cutoff (16 bit)
+filter res (4 bit)
+Hp
+Lp
+Bp
+
+output
+osc3
+env3
+
