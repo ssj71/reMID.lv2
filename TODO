@@ -1,11 +1,16 @@
-add manual mode (no instruments)
+change architecture so there is a "current" instrument
+ and midi/gui just loads presets into it (then you can tweak and save)
 make polyphony selectable
+cleanup errors
+make readme more friendly
 new GUI
 add circular buffer to change instrument collection
+learn AVTK/Pugl
 LV2-ize
 add env3tofilter opcode
 add osc3tofilter opcode
-add opcodes for voice detune (is freq. resolution fine enough?)
+add opcodes for voice detune (is freq. resolution fine enough? I think so)
+refactor parser to avoid GTK
 
 
 
@@ -18,6 +23,7 @@ instruments file
 instruments
 current instrument
 reload instrument
+script?
 
 manual mode: 
 per voice:
