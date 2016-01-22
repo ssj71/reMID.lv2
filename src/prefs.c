@@ -47,7 +47,7 @@ int readn(char *str)
     return strtol(str, (char **)NULL, 0);
 }
 
-//TODO: still need to do some malloc of instruments (or probably shoud rather move malloc to the midi init)
+//TODO: still need to do some malloc of instruments (or probably should rather move malloc to the midi init)
 sid_instrument_t** default_instrument()
 {
     sid_instrument_t** sid_instr;
@@ -126,6 +126,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
     sid_instrument_t** sid_instr;
 
     inst_config = g_key_file_new();
+    printf("loading %s",path);
     i = g_key_file_load_from_file(inst_config, path,
                                 G_KEY_FILE_KEEP_COMMENTS, NULL);
     if(!i)
@@ -307,7 +308,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
             const char *delims = ",";
             char *line = strdup(value);
             char *token;
-            while(token = strsep(&line, delims))
+            while((token = strsep(&line, delims)))
             {
                 cmd = calloc(1, sizeof(sid_command_t));
                 cmd->next = NULL;

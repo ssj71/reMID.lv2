@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     jack_connect_args[0] = NULL;
     midi_connect_args[0] = NULL;
 
-    while((c = getopt(argc, argv, "dhj:m:np:s:"))!=-1)
+    while((c = getopt(argc, argv, "dhj:m:np:i:s:"))!=-1)
     {
         switch (c)
         {
