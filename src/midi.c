@@ -5,6 +5,7 @@
 #include <jack/jack.h>
 
 #include "midi.h"
+#define JACK_MIDI
 
 #ifdef ALSA_MIDI
 #include "alsa_midi.h"

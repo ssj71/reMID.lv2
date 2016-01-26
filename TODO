@@ -1,33 +1,38 @@
+V1
+cleanup errors
+make readme more friendly
+LV2-ize
+add opcodes for voice detune (is freq. resolution fine enough? I think so)
+add env3tofilter opcode
+add osc3tofilter opcode
+
+V2 - single voice, no perc. mode :(
+perhaps should add N voices in GUI that allows unison, perc, or preset mode (default)
+make generic synth control template
 change architecture so there is a "current" instrument
  and midi/gui just loads presets into it (then you can tweak and save)
 make polyphony selectable
-cleanup errors
-make readme more friendly
 new GUI
 add circular buffer to change instrument collection
 learn AVTK/Pugl
-LV2-ize
-add env3tofilter opcode
-add osc3tofilter opcode
-add opcodes for voice detune (is freq. resolution fine enough? I think so)
-refactor parser to avoid GTK
+refactor parser to avoid GTK (probably will scrap parser)
+python utiil  to convert banks to lv2 states
 
 
 
 __GUI__
-polyphony,
-gain? (not unless its already there)
+V1 - file selector
 
-instrument mode:
-instruments file
-instruments
-current instrument
-reload instrument
-script?
+V2 
+voice polyphony,
+
+script box
 
 manual mode: 
 per voice:
  detune
+  octave
+  fine
  pw (12 bit)
  wave (noise, square, saw, tri, ring mod, off)
  sync (1 bit)

@@ -383,7 +383,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             continue;
         }
         //printf("%d: %d - %d\n", channel, program, inst_num);
-        sid_instrument_t *instr = sid_instr[inst_num];//TODO: global instrument thing
+        sid_instrument_t *instr = sid_instr[inst_num];
 
         // percussion map
         if(instr->type==PERCUSSION_MAP)

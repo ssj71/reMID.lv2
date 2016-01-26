@@ -5,7 +5,7 @@
 #include "sid_instr.h"
 #include "midi.h"
 
-extern pthread_mutex_t prefs_mutex;
+//extern pthread_mutex_t prefs_mutex;
 
 //extern char *instr_file;
 

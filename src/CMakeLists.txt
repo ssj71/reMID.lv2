@@ -33,7 +33,8 @@ link_directories ( ${JACK_LIBRARY_DIRS} ${GLIB_LIBRARY_DIRS})
 #	#add_definitions(-DALSA_MIDI)
 #endif()
 
-add_definitions(-DJACK_MIDI)
+#I decided to just define this in midi.c
+#add_definitions(-DJACK_MIDI)
 
 #I can't get the UI to work (glade version too old)
 #if(GTK2_FOUND)
