@@ -6,7 +6,20 @@ libjack-dev
 resid
 
 resid can be downloaded and installed from http://www.zimmers.net/anonftp/pub/cbm/crossplatform/emulators/resid/index.html
+just extract that archive and issue the commands:
+   cd remid
+   ./configure
+   make
+   sudo make install
 
+Once the dependencies are fulfilled return to this folder and run:
+   mkdir build
+   cd build
+   cmake ..
+   make
+   sudo make install
+   
+Currently this will build and install the standalone. At some point I hope it will also make a plugin version
 
-See instruments.conf for instrument parameters.
+reMID has scripting capabilities so that you can create instruments and files containing banks of instruments. You cannot actually get any sound out of reMID without an instrument file (so naturally we include and install a default). See instruments.conf for examples and more info on instrument parameters.
 
