@@ -16,7 +16,7 @@
 #define SND_SEQ_EVENT_CHANPRESS 0xd0
 #define SND_SEQ_EVENT_PITCHBEND 0xe0
 
-struct urid
+struct urid_t
 {
     //lv2 stuff
     LV2_URID m_midi_event;
@@ -38,7 +38,7 @@ struct lmidi
     void *midi_buf;
     jack_midi_event_t midi_event;
 
-    struct urid;
+    struct urid_t urid;
     LV2_Atom_Sequence* midi_in_p;
 };
 
@@ -125,10 +125,10 @@ void* lv2_init_seq(jack_client_t* client,const LV2_Feature * const* host_feature
             if (urid_map)
             {
                 lm->urid.m_midi_event = urid_map->map(urid_map->handle, LV2_MIDI__MidiEvent);
-                lm->urid.a_other = urid_map->map(urid_map->handle, LV2_ATOM__Blank);
+                lm->urid.a_blank = urid_map->map(urid_map->handle, LV2_ATOM__Blank);
                 lm->urid.a_long = urid_map->map(urid_map->handle, LV2_ATOM__Long);
                 lm->urid.a_float = urid_map->map(urid_map->handle, LV2_ATOM__Float);
-                lm->urid.t_time_info = urid_map->map(urid_map->handle, LV2_TIME__Position);
+                lm->urid.t_time = urid_map->map(urid_map->handle, LV2_TIME__Position);
                 lm->urid.t_beatsperbar = urid_map->map(urid_map->handle, LV2_TIME__barBeat);
                 lm->urid.t_bpm = urid_map->map(urid_map->handle, LV2_TIME__beatsPerMinute);
                 lm->urid.t_speed = urid_map->map(urid_map->handle, LV2_TIME__speed);
@@ -138,6 +138,5 @@ void* lv2_init_seq(jack_client_t* client,const LV2_Feature * const* host_feature
             }
         }
     }
-    jm->midi_port = jack_port_register(client, MIDI_PORTNAME, JACK_DEFAULT_MIDI_TYPE, JackPortIsInput, 0);
-    return (void*)jm;
+    return (void*)lm;
 }
