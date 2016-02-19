@@ -15,10 +15,13 @@ struct super
     struct midi_arrays* midi;
     sid_instrument_t **sid_instr;
 
+#ifndef LV2
     jack_client_t *client;
     jack_port_t *output_port_l;
     jack_port_t *output_port_r;
     char port_names[2][16];
+#endif
+
 };
 
 int process(jack_nframes_t nframes, void *arg)
@@ -34,8 +37,11 @@ int process(jack_nframes_t nframes, void *arg)
 
     read_midi(s->midi->seq,nframes, s->midi);
 
+#ifndef LV2
     sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
     sample_t *outr = (sample_t *)jack_port_get_buffer(s->output_port_r, nframes);
+#endif
+
     for(i=0; i<nframes; i++)
     {
     	outr[i] = 0.0;
