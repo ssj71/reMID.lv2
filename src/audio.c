@@ -1,11 +1,14 @@
-
-#include <jack/jack.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-
+//#define LV2
+#ifndef LV2
+#include <jack/jack.h>
 #include "jack_audio.h"
+#else
+#include "lv2_audio.h"
+#endif
 #include "sid_instr.h"
 #include "prefs.h"
 
@@ -20,11 +23,14 @@ struct super
     jack_port_t *output_port_l;
     jack_port_t *output_port_r;
     char port_names[2][16];
+#else
+    float* outl; //lv2 ports
+	float* outr;
 #endif
 
 };
 
-int process(jack_nframes_t nframes, void *arg)
+int process(uint32_t nframes, void *arg)
 {
     int i,j;
 
@@ -89,7 +95,7 @@ int process(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
-int srate(jack_nframes_t nframes, void *arg)
+int srate(uint32_t nframes, void *arg)
 {
     struct super* s = (struct super*)arg;
     printf("The sample rate is now %" PRIu32 "/sec\n", nframes);
@@ -97,6 +103,7 @@ int srate(jack_nframes_t nframes, void *arg)
     return 0;
 }
 
+#ifndef LV2
 void jack_shutdown(void *arg)
 {
     struct super* s = (struct super*)arg;
@@ -179,3 +186,22 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
     return 1;
 }
 
+#else
+int init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file)
+{
+
+    struct super *s = malloc(sizeof(struct super));
+
+    s->midi = init_midi(0, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
+
+    //load instrument //TODO: make a "find file" function
+    s->sid_instr = NULL;
+	s->sid_instr = read_instruments(instr_file, s->midi);
+    if(!s->sid_instr)
+        s->sid_instr = default_instrument();
+
+
+    s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
+    return 1;
+}
+#endif

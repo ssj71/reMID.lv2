@@ -47,7 +47,7 @@ link_directories ( ${JACK_LIBRARY_DIRS} ${GLIB_LIBRARY_DIRS})
 
 add_executable(reMID
     #alsa_midi.c
-    jack_audio.c
+    audio.c
     jack_midi.c
     midi.c
     prefs.c

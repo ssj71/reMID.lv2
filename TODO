@@ -1,7 +1,7 @@
 V1
-cleanup errors
-make readme more friendly
+cleanup warnings
 LV2-ize
+fix default instrument
 add opcodes for voice detune (is freq. resolution fine enough? I think so)
 add env3tofilter opcode
 add osc3tofilter opcode
