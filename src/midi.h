@@ -1,8 +1,6 @@
 #ifndef MIDI_H
 #define MIDI_H
 
-#include <jack/jack.h>
-
 #define MIDI_PORTNAME "MIDI_In"
 
 typedef struct midi_key_state
@@ -53,8 +51,8 @@ extern int midi_programs[];
 extern double note_frqs[];
 */
 
-midi_arrays_t* init_midi(jack_client_t* client, int polyphony, char** midi_connect_args);
-void read_midi(void* mseq, jack_nframes_t nframes, midi_arrays_t* midi);
+midi_arrays_t* init_midi(void* o, int polyphony, char** midi_connect_args);
+void read_midi(void* mseq, uint32_t nframes, midi_arrays_t* midi);
 void note_on(midi_arrays_t* midi, int channel, int note, int velocity);
 void note_off(midi_arrays_t* midi, int channel, int note);
 void silence_all(midi_key_state_t **midi_keys);

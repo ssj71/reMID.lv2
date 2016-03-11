@@ -6,5 +6,7 @@
 
 int init_lv2_audio(int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file);
 int process(uint32_t nsamples, void* arg);
+void set_lout(void* arg, float* lout);
+void set_rout(void* arg, float* rout);
 
 #endif

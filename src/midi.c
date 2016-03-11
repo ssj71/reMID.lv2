@@ -1,11 +1,13 @@
+// a large portion of why this file exists is to try to keep all the preprocessor
+// stuff for the different midi engines constrained to one file
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
-#include <jack/jack.h>
 
 #include "midi.h"
-#define JACK_MIDI
+//#define JACK_MIDI
+#define LV2_MIDI
 
 #ifdef ALSA_MIDI
 #include "alsa_midi.h"
@@ -13,6 +15,10 @@
 
 #ifdef JACK_MIDI
 #include "jack_midi.h"
+#endif
+
+#ifdef LV2_MIDI
+#include "lv2_midi.h"
 #endif
 
 #include "prefs.h"
@@ -104,7 +110,7 @@ void note_off(midi_arrays_t* midi, int channel, int note)
     }
 }
 
-void read_midi(void* seq, jack_nframes_t nframes, midi_arrays_t* midi)
+void read_midi(void* seq, uint32_t nframes, midi_arrays_t* midi)
 {
 #ifdef ALSA_MIDI
     alsa_read_midi(seq, midi);
@@ -112,9 +118,12 @@ void read_midi(void* seq, jack_nframes_t nframes, midi_arrays_t* midi)
 #ifdef JACK_MIDI
     jack_read_midi(seq, nframes, midi);
 #endif
+#ifdef LV2_MIDI
+    lv2_read_midi(seq, nframes, midi);
+#endif
 }
 
-midi_arrays_t* init_midi(jack_client_t* client, int polyphony, char** midi_connect_args)
+midi_arrays_t* init_midi(void* o, int polyphony, char** midi_connect_args)
 {
     int i;
     midi_arrays_t* midi = malloc(sizeof(midi_arrays_t));
@@ -129,11 +138,20 @@ midi_arrays_t* init_midi(jack_client_t* client, int polyphony, char** midi_conne
 #endif
 
 #ifdef JACK_MIDI
+    jack_client_t* client = (jack_client_t*)o;
     midi->seq = jack_init_seq(client);
     if (!midi->seq)
     {
         fprintf(stderr, "JACK MIDI initialisation error.\n");
     }
+#endif
+#ifdef LV2_MIDI
+    midi->seq = lv2_init_seq((const LV2_Feature * const*)o);
+    if (!midi->seq)
+    {
+        fprintf(stderr, "MIDI initialisation error.\n");
+    }
+
 #endif
 
     for(i=0; midi_connect_args[i]; i++)

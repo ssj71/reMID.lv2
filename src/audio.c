@@ -2,7 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-//#define LV2
+
+#define LV2
 #ifndef LV2
 #include <jack/jack.h>
 #include "jack_audio.h"
@@ -46,6 +47,9 @@ int process(uint32_t nframes, void *arg)
 #ifndef LV2
     sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
     sample_t *outr = (sample_t *)jack_port_get_buffer(s->output_port_r, nframes);
+#else
+    float* outl = s->outl;
+    float* outr = s->outr;
 #endif
 
     for(i=0; i<nframes; i++)
@@ -95,11 +99,11 @@ int process(uint32_t nframes, void *arg)
     return 0;
 }
 
-int srate(uint32_t nframes, void *arg)
+int srate(uint32_t fs, void *arg)
 {
     struct super* s = (struct super*)arg;
-    printf("The sample rate is now %" PRIu32 "/sec\n", nframes);
-    sid_set_srate(s->sid_bank, 1, nframes);//1 should be pal arg
+    printf("The sample rate is now %" PRIu32 "/sec\n", fs);
+    sid_set_srate(s->sid_bank, 1, fs);//1 should be pal arg
     return 0;
 }
 
@@ -148,7 +152,7 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
     }
 
 
-    s->midi = init_midi(s->client, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
+    s->midi = init_midi((void*)s->client, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
 
     //load instrument //TODO: make a "find file" function
     s->sid_instr = NULL;
@@ -187,12 +191,12 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
 }
 
 #else
-int init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file)
+void* init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file, uint32_t fs, const LV2_Feature * const* host_features)
 {
 
     struct super *s = malloc(sizeof(struct super));
 
-    s->midi = init_midi(0, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
+    s->midi = init_midi((void*)host_features, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
 
     //load instrument //TODO: make a "find file" function
     s->sid_instr = NULL;
@@ -202,6 +206,19 @@ int init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** jac
 
 
     s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
-    return 1;
+    srate(fs,s);
+    return (void*)s;
+}
+
+void set_lout(void* arg, float* lout)
+{
+    struct super* s = (struct super*)arg;
+    s->outl = lout;
+}
+
+void set_rout(void* arg, float* rout)
+{
+    struct super* s = (struct super*)arg;
+    s->outr = rout;
 }
 #endif
