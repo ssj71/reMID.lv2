@@ -5,8 +5,11 @@
 #include<lv2/lv2plug.in/ns/ext/midi/midi.h>
 #include<lv2/lv2plug.in/ns/ext/atom/util.h>
 #include<lv2/lv2plug.in/ns/ext/time/time.h>
+#include<lv2/lv2plug.in/ns/ext/patch/patch.h>
 
 #include "midi.h"
+
+#define INSTRUMENT_FILE_URI "hey"
 
 #define SND_SEQ_EVENT_NOTEOFF 0x80
 #define SND_SEQ_EVENT_NOTEON 0x90
@@ -24,12 +27,18 @@ struct urid_t
     LV2_URID a_atom_Sequence;
     LV2_URID a_float;
     LV2_URID a_long;
+    LV2_URID a_object;
     LV2_URID t_time;
     LV2_URID t_beatsperbar;
     LV2_URID t_bpm;
     LV2_URID t_speed;
     LV2_URID t_frame;
     LV2_URID t_framespersec;
+    LV2_URID patch_Set;
+    LV2_URID patch_Get;
+    LV2_URID patch_property;
+    LV2_URID patch_value;
+    LV2_URID filetype_instr;
 };
 
 struct lmidi
@@ -45,7 +54,7 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
     uint8_t* msg;
 
     //TODO: not sample accurate
-    LV2_ATOM_SEQUENCE_FOREACH(synth->atom_in_p, event)
+    LV2_ATOM_SEQUENCE_FOREACH(lm->atom_in_p, event)
     {
     	if(event)
     	{
@@ -107,6 +116,39 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 					break;
 				}//switch message type
     		}//if event is midi
+    		else if(event->body.type == lm->urid.a_object)
+    		{
+				const LV2_Atom_Object* obj = (const LV2_Atom_Object*)&event->body;
+				if (obj->body.otype == lm->urid.patch_Set)
+				{
+					// Get the property the set message is setting
+					const LV2_Atom* property = NULL;
+					lv2_atom_object_get(obj, lm->urid.patch_property, &property, 0);
+					if (property && property->type == lm->urid.atom_URID)
+					{
+						const uint32_t key = ((const LV2_Atom_URID*)property)->body;
+						if (key == lm->urid.filetype_rvb)
+						{
+							// a new file! pass the atom to the worker thread to load it
+							plug->scheduler->schedule_work(plug->scheduler->handle, lv2_atom_total_size(&ev->body), &ev->body);
+						}//property is rvb file
+					}//property is URID
+				}
+				else if (obj->body.otype == lm->urid.patch_Get)
+				{
+					// Received a get message, emit our state (probably to UI)
+					lv2_atom_forge_frame_time(&plug->forge, event->time.frames );//use current event's time
+					LV2_Atom_Forge_Frame frame;
+					lv2_atom_forge_object( &plug->forge, &frame, 0, lm->urid.patch_Set);
+
+					lv2_atom_forge_key(&plug->forge, lm->urid.patch_property);
+					lv2_atom_forge_urid(&plug->forge, lm->urid.filetype_rvb);
+					lv2_atom_forge_key(&plug->forge, lm->urid.patch_value);
+					lv2_atom_forge_path(&plug->forge, plug->revtron->File.Filename, strlen(plug->revtron->File.Filename)+1);
+
+					lv2_atom_forge_pop(&plug->forge, &frame);
+				}
+    		}
     	}//if event not null
     }//for each atom
 }
@@ -125,15 +167,33 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.a_blank = urid_map->map(urid_map->handle, LV2_ATOM__Blank);
                 lm->urid.a_long = urid_map->map(urid_map->handle, LV2_ATOM__Long);
                 lm->urid.a_float = urid_map->map(urid_map->handle, LV2_ATOM__Float);
+                lm->urid.a_object = urid_map->map(urid_map->handle, LV2_ATOM__Object);
                 lm->urid.t_time = urid_map->map(urid_map->handle, LV2_TIME__Position);
                 lm->urid.t_beatsperbar = urid_map->map(urid_map->handle, LV2_TIME__barBeat);
                 lm->urid.t_bpm = urid_map->map(urid_map->handle, LV2_TIME__beatsPerMinute);
                 lm->urid.t_speed = urid_map->map(urid_map->handle, LV2_TIME__speed);
                 lm->urid.t_frame = urid_map->map(urid_map->handle, LV2_TIME__frame);
                 lm->urid.t_framespersec = urid_map->map(urid_map->handle, LV2_TIME__framesPerSecond);
+                lm->urid.patch_Set = urid_map->map(urid_map->handle,LV2_PATCH__Set);
+                lm->urid.patch_Get = urid_map->map(urid_map->handle,LV2_PATCH__Get);
+                lm->urid.patch_property = urid_map->map(urid_map->handle,LV2_PATCH__property);
+                lm->urid.patch_value = urid_map->map(urid_map->handle,LV2_PATCH__value);
+                lm->urid.filetype_instr = urid_map->map(urid_map->handle,INSTRUMENT_FILE_URI);
                 break;
             }
         }
     }
     return (void*)lm;
+}
+
+void lv2_close_seq(void* mseq)
+{
+    struct lmidi* lm = (struct lmidi*)mseq;
+    free(lm);
+}
+
+LV2_Atom_Sequence** lv2_get_atom_port(void* mseq)
+{
+    struct lmidi* lm = (struct lmidi*)mseq;
+    return &(lm->atom_in_p);
 }
