@@ -6,6 +6,8 @@
 #include<lv2/lv2plug.in/ns/ext/atom/util.h>
 #include<lv2/lv2plug.in/ns/ext/time/time.h>
 #include<lv2/lv2plug.in/ns/ext/patch/patch.h>
+#include<lv2/lv2plug.in/ns/ext/atom/forge.h>
+#include<lv2/lv2plug.in/ns/ext/worker/worker.h>
 
 #include "midi.h"
 
@@ -28,6 +30,7 @@ struct urid_t
     LV2_URID a_float;
     LV2_URID a_long;
     LV2_URID a_object;
+    LV2_URID a_urid;
     LV2_URID t_time;
     LV2_URID t_beatsperbar;
     LV2_URID t_bpm;
@@ -44,7 +47,11 @@ struct urid_t
 struct lmidi
 {
     struct urid_t urid;
-    LV2_Atom_Sequence* atom_in_p;
+    LV2_Atom_Sequence* atom_in_p;//for host to tell us what file to load
+    LV2_Atom_Sequence* atom_out_p;//to notify host that what file we've loaded
+    LV2_Atom_Forge forge;
+    LV2_Atom_Forge_Frame atom_frame;
+    LV2_Worker_Schedule* scheduler;
 };
 
 void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
@@ -124,29 +131,29 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 					// Get the property the set message is setting
 					const LV2_Atom* property = NULL;
 					lv2_atom_object_get(obj, lm->urid.patch_property, &property, 0);
-					if (property && property->type == lm->urid.atom_URID)
+					if (property && property->type == lm->urid.a_urid)
 					{
 						const uint32_t key = ((const LV2_Atom_URID*)property)->body;
-						if (key == lm->urid.filetype_rvb)
+						if (key == lm->urid.filetype_instr)
 						{
 							// a new file! pass the atom to the worker thread to load it
-							plug->scheduler->schedule_work(plug->scheduler->handle, lv2_atom_total_size(&ev->body), &ev->body);
+							lm->scheduler->schedule_work(lm->scheduler->handle, lv2_atom_total_size(&event->body), &event->body);
 						}//property is rvb file
 					}//property is URID
 				}
 				else if (obj->body.otype == lm->urid.patch_Get)
 				{
 					// Received a get message, emit our state (probably to UI)
-					lv2_atom_forge_frame_time(&plug->forge, event->time.frames );//use current event's time
+					lv2_atom_forge_frame_time(&lm->forge, event->time.frames );//use current event's time
 					LV2_Atom_Forge_Frame frame;
-					lv2_atom_forge_object( &plug->forge, &frame, 0, lm->urid.patch_Set);
+					lv2_atom_forge_object( &lm->forge, &frame, 0, lm->urid.patch_Set);
 
-					lv2_atom_forge_key(&plug->forge, lm->urid.patch_property);
-					lv2_atom_forge_urid(&plug->forge, lm->urid.filetype_rvb);
-					lv2_atom_forge_key(&plug->forge, lm->urid.patch_value);
-					lv2_atom_forge_path(&plug->forge, plug->revtron->File.Filename, strlen(plug->revtron->File.Filename)+1);
+					lv2_atom_forge_key(&lm->forge, lm->urid.patch_property);
+					lv2_atom_forge_urid(&lm->forge, lm->urid.filetype_instr);
+					lv2_atom_forge_key(&lm->forge, lm->urid.patch_value);
+					lv2_atom_forge_path(&lm->forge, lm->revtron->File.Filename, strlen(lm->revtron->File.Filename)+1);
 
-					lv2_atom_forge_pop(&plug->forge, &frame);
+					lv2_atom_forge_pop(&lm->forge, &frame);
 				}
     		}
     	}//if event not null
@@ -168,6 +175,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.a_long = urid_map->map(urid_map->handle, LV2_ATOM__Long);
                 lm->urid.a_float = urid_map->map(urid_map->handle, LV2_ATOM__Float);
                 lm->urid.a_object = urid_map->map(urid_map->handle, LV2_ATOM__Object);
+                lm->urid.a_urid = urid_map->map(urid_map->handle, LV2_ATOM__URID);
                 lm->urid.t_time = urid_map->map(urid_map->handle, LV2_TIME__Position);
                 lm->urid.t_beatsperbar = urid_map->map(urid_map->handle, LV2_TIME__barBeat);
                 lm->urid.t_bpm = urid_map->map(urid_map->handle, LV2_TIME__beatsPerMinute);
@@ -181,6 +189,10 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.filetype_instr = urid_map->map(urid_map->handle,INSTRUMENT_FILE_URI);
                 break;
             }
+        }
+        else if(!strcmp(host_features[i]->URI,LV2_WORKER__schedule))
+        {
+            lm->scheduler = (LV2_Worker_Schedule*)host_features[i]->data;
         }
     }
     return (void*)lm;
