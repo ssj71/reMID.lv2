@@ -47,6 +47,7 @@ struct urid_t
 struct lmidi
 {
     struct urid_t urid;
+    char* filepath;//this seems hacky to keep it here, but its the easiest way
     LV2_Atom_Sequence* atom_in_p;//for host to tell us what file to load
     LV2_Atom_Sequence* atom_out_p;//to notify host that what file we've loaded
     LV2_Atom_Forge forge;
@@ -138,6 +139,8 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 						{
 							// a new file! pass the atom to the worker thread to load it
 							lm->scheduler->schedule_work(lm->scheduler->handle, lv2_atom_total_size(&event->body), &event->body);
+							//TODO: need to grab the path and store it here
+							//issue with this is if the file doesn't work, then we loose the old file path
 						}//property is rvb file
 					}//property is URID
 				}
@@ -151,7 +154,7 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 					lv2_atom_forge_key(&lm->forge, lm->urid.patch_property);
 					lv2_atom_forge_urid(&lm->forge, lm->urid.filetype_instr);
 					lv2_atom_forge_key(&lm->forge, lm->urid.patch_value);
-					lv2_atom_forge_path(&lm->forge, lm->revtron->File.Filename, strlen(lm->revtron->File.Filename)+1);
+					lv2_atom_forge_path(&lm->forge, lm->filepath, strlen(lm->filepath)+1);
 
 					lv2_atom_forge_pop(&lm->forge, &frame);
 				}
@@ -195,6 +198,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
             lm->scheduler = (LV2_Worker_Schedule*)host_features[i]->data;
         }
     }
+    strcpy(lm->filepath,"instruments.conf");//default path is in bundle
     return (void*)lm;
 }
 

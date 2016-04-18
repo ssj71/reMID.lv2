@@ -226,3 +226,46 @@ void midi_close(midi_arrays_t* midi, int polyphony)
     free(midi->midi_keys);
     free(midi->free_voices);
 }
+
+
+//this makes a new midi_arrays object and copies a lot of data out of the old one
+midi_arrays_t* new_midi_arrays(midi_arrays_t* old_midi, int polyphony)
+{
+    int i;
+    midi_arrays_t* midi = malloc(sizeof(midi_arrays_t));
+
+    // copy as much as we can from old, but re-init for hygiene
+
+    midi->midi_keys = old_midi->midi_keys;
+    for(i=0; i<polyphony; i++)
+    {
+        midi->midi_keys[i]->channel = -1;
+        midi->midi_keys[i]->note_on = 0;
+        midi->midi_keys[i]->note_state_changed = 0;
+        midi->midi_keys[i]->last_used = -1;
+        midi->midi_keys[i]->needs_clearing = 0;
+    }
+    midi->midi_keys[i] = NULL;
+    midi->free_voices = old_midi->free_voices;
+    midi->next_voice = 0;
+    midi->voice_use_index = 0;
+
+    for(i=0; i<128; i++) midi->midi_programs[i] = -1;
+
+    for(i=0; i<16; i++)
+    {
+        midi->midi_channels[i].in_use = 0;
+        midi->midi_channels[i].program = -1;
+        midi->midi_channels[i].sustain = 0;
+        midi->midi_channels[i].pitchbend = 0;
+        midi->midi_channels[i].vibrato = 0;
+        midi->midi_channels[i].vibrato_changed = 0;
+    }
+
+    for(i=0; i<128; i++) midi->note_frqs[i] = old_midi->note_frqs[i];
+
+    midi->seq = old_midi->seq;
+
+    return midi;
+
+}
