@@ -30,6 +30,7 @@ struct urid_t
     LV2_URID a_float;
     LV2_URID a_long;
     LV2_URID a_object;
+    LV2_URID a_path;
     LV2_URID a_urid;
     LV2_URID t_time;
     LV2_URID t_beatsperbar;
@@ -139,6 +140,14 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 						{
 							// a new file! pass the atom to the worker thread to load it
 							lm->scheduler->schedule_work(lm->scheduler->handle, lv2_atom_total_size(&event->body), &event->body);
+							const LV2_Atom* file_path;
+							lv2_atom_object_get(&event->body, lm->urid.patch_value, &file_path, 0);
+							if (file_path && file_path->type == lm->urid.a_path)
+							{
+								// Load file.
+								char* path = (char*)LV2_ATOM_BODY_CONST(file_path);
+								strcpy(lm->filepath,path);
+							}
 							//TODO: need to grab the path and store it here
 							//issue with this is if the file doesn't work, then we loose the old file path
 						}//property is rvb file
@@ -178,6 +187,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.a_long = urid_map->map(urid_map->handle, LV2_ATOM__Long);
                 lm->urid.a_float = urid_map->map(urid_map->handle, LV2_ATOM__Float);
                 lm->urid.a_object = urid_map->map(urid_map->handle, LV2_ATOM__Object);
+                lm->urid.a_path = urid_map->map(urid_map->handle, LV2_ATOM__Path);
                 lm->urid.a_urid = urid_map->map(urid_map->handle, LV2_ATOM__URID);
                 lm->urid.t_time = urid_map->map(urid_map->handle, LV2_TIME__Position);
                 lm->urid.t_beatsperbar = urid_map->map(urid_map->handle, LV2_TIME__barBeat);
