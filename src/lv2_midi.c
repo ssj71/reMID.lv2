@@ -140,6 +140,7 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 						{
 							// a new file! pass the atom to the worker thread to load it
 							lm->scheduler->schedule_work(lm->scheduler->handle, lv2_atom_total_size(&event->body), &event->body);
+#if(0)
 							const LV2_Atom* file_path;
 							lv2_atom_object_get(&event->body, lm->urid.patch_value, &file_path, 0);
 							if (file_path && file_path->type == lm->urid.a_path)
@@ -148,8 +149,8 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 								char* path = (char*)LV2_ATOM_BODY_CONST(file_path);
 								strcpy(lm->filepath,path);
 							}
-							//TODO: need to grab the path and store it here
 							//issue with this is if the file doesn't work, then we loose the old file path
+#endif
 						}//property is rvb file
 					}//property is URID
 				}
@@ -218,8 +219,20 @@ void lv2_close_seq(void* mseq)
     free(lm);
 }
 
-LV2_Atom_Sequence** lv2_get_atom_port(void* mseq)
+void lv2_set_atom_in_port(void* mseq, void* port)
 {
     struct lmidi* lm = (struct lmidi*)mseq;
-    return &(lm->atom_in_p);
+    lm->atom_in_p = (LV2_Atom_Sequence*)port;
+}
+
+void lv2_set_atom_out_port(void* mseq, void* port)
+{
+    struct lmidi* lm = (struct lmidi*)mseq;
+    lm->atom_out_p = (LV2_Atom_Sequence*)port;
+}
+
+char** lv2_get_file_string(void* mseq)
+{
+    struct lmidi* lm = (struct lmidi*)mseq;
+    return &(lm->filepath);
 }

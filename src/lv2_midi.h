@@ -5,6 +5,8 @@
 
 void* lv2_init_seq(const LV2_Feature * const* host_features)
 void lv2_read_midi(void* mseq, jack_nframes_t nframes, struct midi_arrays *midi);
-LV2_Atom_Sequence** lv2_get_atom_port(void* mseq);
+void lv2_get_atom_in_port(void* mseq, void* port);
+void lv2_get_atom_out_port(void* mseq, void* port);
+char** lv2_get_file_string(void* mseq);
 
 #endif

@@ -191,10 +191,15 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
 }
 
 #else
-void* init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file, uint32_t fs, const LV2_Feature * const* host_features)
+void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
 {
 
     struct super *s = malloc(sizeof(struct super));
+    char midi_connect_args[2] = "";
+    char instr_file[25] = "instruments.conf";
+    int max_polyphony = 32;
+    int use_sid_volume = 0;
+    int debug = 0;
 
     s->midi = init_midi((void*)host_features, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
 
@@ -210,15 +215,26 @@ void* init_LV2_audio( int use_sid_volume, int max_polyphony, int debug, char** j
     return (void*)s;
 }
 
+//port setters
 void set_lout(void* arg, float* lout)
 {
     struct super* s = (struct super*)arg;
     s->outl = lout;
 }
-
 void set_rout(void* arg, float* rout)
 {
     struct super* s = (struct super*)arg;
     s->outr = rout;
 }
+void set_ain(void* arg, void* ain)
+{
+    struct super* s = (struct super*)arg;
+    lv2_set_atom_in_port(s->midi->seq,ain);
+}
+void set_ain(void* arg, void* ain)
+{
+    struct super* s = (struct super*)arg;
+    lv2_set_atom_in_port(s->midi->seq,ain);
+}
+
 #endif
