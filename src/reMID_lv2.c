@@ -5,7 +5,9 @@
 
 
 #include "lv2_audio.h"
-#include "lv2_midi.h"
+//#include "lv2_midi.h"
+#include<lv2/lv2plug.in/ns/ext/state/state.h>
+#include<lv2/lv2plug.in/ns/ext/worker/worker.h>
 
 #define REMID_URI "http://github.com/ssj71/reMID.lv2"
 #ifndef MAX_POLYPHONY
@@ -13,67 +15,7 @@
 #endif
 
 
-#if(0)
-int main(int argc, char **argv)
-{
-    int c, use_sid_volume=0, max_poly = MAX_POLYPHONY;
-    pthread_t gui_thread;
-    int use_gui;
-    int pt_debug;
-    char *midi_connect_args[255];
-    char *jack_connect_args[255];
-    char *instr_file = "instruments.conf";
-    jack_connect_args[0] = NULL;
-    midi_connect_args[0] = NULL;
 
-    while((c = getopt(argc, argv, "dhj:m:np:i:s:"))!=-1)
-    {
-        switch (c)
-        {
-        case 'd':
-            pt_debug = 1;
-            break;
-        case 'h':
-            usage(argv[0]);
-            break;
-        case 'j':
-            add_connect(jack_connect_args,optarg);
-            break;
-        case 'm':
-            add_connect(midi_connect_args,optarg);
-            break;
-        case 'n':
-            use_gui = 0;
-            break;
-        case 'p':
-            max_poly = atoi(optarg);
-            break;
-        case 'i':
-            instr_file = optarg;
-            break;
-        case 's':
-            if(atoi(optarg))
-            {
-                printf("using SID volume control\n");
-                use_sid_volume = 1;
-            }
-            else
-            {
-                printf("Not using SID volume control\n");
-                use_sid_volume = 0;
-            }
-            break;
-        }
-    }
-
-    if(max_poly < 1)
-        max_poly = 1;
-    if(max_poly > 128)
-        max_poly = 128;
-}
-#endif
-
-//    init_jack_audio(use_sid_volume, max_poly, pt_debug, jack_connect_args, midi_connect_args, instr_file);
 typedef struct arugalatastesbad
 {
 	float* L;
@@ -86,13 +28,12 @@ typedef struct arugalatastesbad
 
 LV2_Handle init_remid(const LV2_Descriptor *descriptor,double sample_freq, const char *bundle_path,const LV2_Feature * const* host_features)
 {
-	Remid* p = malloc(sizeof(Remid));
-    p->everything = init_lv2_audio((uint32_t)sample_freq,host_features);
-    p->L =
+    return init_lv2_audio((uint32_t)sample_freq,host_features);
 }
 
 void connect_remid_ports(LV2_Handle handle, uint32_t port, void* data)
 {
+	//I don't really love the function calls here, but refactoring will be painful
 	switch(port)
 	{
 	case 0:
@@ -110,6 +51,55 @@ void connect_remid_ports(LV2_Handle handle, uint32_t port, void* data)
 	}
 }
 
+void run_remid(LV2_Handle handle, uint32_t nframes)
+{
+	process(nframes,handle);
+}
+
+void cleanup_remid(LV2_Handle handle)
+{
+	cleanup_audio(handle);
+}
+
+//this is done in a separate thread;
+static LV2_Worker_Status remidwork(LV2_Handle handle, LV2_Worker_Respond_Function respond, LV2_Worker_Respond_Handle rhandle, uint32_t size, const void* data)
+{
+	//trouble is all the atom stuff we need is out of scope...
+	//may need to put all structs in header files so I can access them :(
+
+}
+//this one is run in RT thread
+static LV2_Worker_Status remidwork_response(LV2_Handle handle, uint32_t size, const void* data)
+{
+
+}
+//this is not RT
+static LV2_State_Status remidsave(LV2_Handle handle, LV2_State_Store_Function  store, LV2_State_Handle state_handle,
+		uint32_t flags, const LV2_Feature* const* features)
+{
+
+}
+//this is not RT
+static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Function retrieve,
+		LV2_State_Handle state_handle, uint32_t flags, const LV2_Feature* const* features)
+{
+
+}
+
+static const void* remid_extension_data(const char* uri)
+{
+    static const LV2_Worker_Interface worker = { remidwork, remidwork_response, NULL };
+    static const LV2_State_Interface state_iface = { remidsave, remidrestore };
+    if (!strcmp(uri, LV2_STATE__interface))
+    {
+        return &state_iface;
+    }
+    else if (!strcmp(uri, LV2_WORKER__interface))
+    {
+        return &worker;
+    }
+    return NULL;
+}
 
 static const LV2_Descriptor lv2_descriptor=
 {
@@ -119,7 +109,8 @@ static const LV2_Descriptor lv2_descriptor=
     0,//activate
     run_remid,
     0,//deactivate
-    cleanup_remid
+    cleanup_remid,
+	remid_extension_data
 };
 
 LV2_SYMBOL_EXPORT

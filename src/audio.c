@@ -215,6 +215,15 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     return (void*)s;
 }
 
+void cleanup_audio(void* arg)
+{
+    struct super* s = (struct super*)arg;
+    midi_close(s->midi);
+    close_instruments(s->sid_instr);
+    sid_close(s->sid_bank);
+    free(s);
+}
+
 //port setters
 void set_lout(void* arg, float* lout)
 {
@@ -231,10 +240,10 @@ void set_ain(void* arg, void* ain)
     struct super* s = (struct super*)arg;
     lv2_set_atom_in_port(s->midi->seq,ain);
 }
-void set_ain(void* arg, void* ain)
+void set_aout(void* arg, void* aout)
 {
     struct super* s = (struct super*)arg;
-    lv2_set_atom_in_port(s->midi->seq,ain);
+    lv2_set_atom_out_port(s->midi->seq,aout);
 }
 
 #endif
