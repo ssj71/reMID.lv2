@@ -1,6 +1,8 @@
 #ifndef MIDI_H
 #define MIDI_H
 
+#include<stdint.h>
+
 #define MIDI_PORTNAME "MIDI_In"
 
 typedef struct midi_key_state

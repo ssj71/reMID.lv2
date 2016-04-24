@@ -3,7 +3,6 @@
 #include <string.h>
 #include <math.h>
 
-#define LV2
 #ifndef LV2
 #include <jack/jack.h>
 #include "jack_audio.h"

@@ -8,6 +8,7 @@
 #include "gui.h"
 #endif
 
+#define JACK_MIDI
 #include "jack_audio.h"
 #include "prefs.h"
 

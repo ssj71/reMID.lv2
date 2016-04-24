@@ -7,7 +7,6 @@
 
 #include "midi.h"
 //#define JACK_MIDI
-#define LV2_MIDI
 
 #ifdef ALSA_MIDI
 #include "alsa_midi.h"
@@ -17,7 +16,7 @@
 #include "jack_midi.h"
 #endif
 
-#ifdef LV2_MIDI
+#ifdef LV2
 #include "lv2_midi.h"
 #endif
 
@@ -118,7 +117,7 @@ void read_midi(void* seq, uint32_t nframes, midi_arrays_t* midi)
 #ifdef JACK_MIDI
     jack_read_midi(seq, nframes, midi);
 #endif
-#ifdef LV2_MIDI
+#ifdef LV2
     lv2_read_midi(seq, nframes, midi);
 #endif
 }
@@ -145,7 +144,7 @@ midi_arrays_t* init_midi(void* o, int polyphony, char** midi_connect_args)
         fprintf(stderr, "JACK MIDI initialisation error.\n");
     }
 #endif
-#ifdef LV2_MIDI
+#ifdef LV2
     midi->seq = lv2_init_seq((const LV2_Feature * const*)o);
     if (!midi->seq)
     {
