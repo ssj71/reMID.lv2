@@ -6,9 +6,6 @@
 
 #include "lv2_audio.h"
 #include "lv2_midi.h"
-#include<lv2/lv2plug.in/ns/ext/atom/util.h>
-#include<lv2/lv2plug.in/ns/ext/state/state.h>
-#include<lv2/lv2plug.in/ns/ext/worker/worker.h>
 
 #define REMID_URI "http://github.com/ssj71/reMID.lv2"
 #ifndef MAX_POLYPHONY
@@ -109,7 +106,7 @@ static const void* remid_extension_data(const char* uri)
     return NULL;
 }
 
-static const LV2_Descriptor lv2_descriptor=
+static const LV2_Descriptor remid_lv2_descriptor=
 {
     REMID_URI,
     init_remid,
@@ -127,4 +124,6 @@ const LV2_Descriptor* lv2_descriptor(uint32_t index)
     switch (index)
     {
     case 0:
-        return &lv2_descriptor ;
+        return &remid_lv2_descriptor ;
+    }
+}

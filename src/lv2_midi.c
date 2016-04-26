@@ -1,15 +1,8 @@
 //spencer jackson
 #include <stdio.h>
-#include<lv2.h>
-#include<lv2/lv2plug.in/ns/ext/urid/urid.h>
-#include<lv2/lv2plug.in/ns/ext/midi/midi.h>
-#include<lv2/lv2plug.in/ns/ext/atom/util.h>
-#include<lv2/lv2plug.in/ns/ext/time/time.h>
-#include<lv2/lv2plug.in/ns/ext/patch/patch.h>
-#include<lv2/lv2plug.in/ns/ext/atom/forge.h>
-#include<lv2/lv2plug.in/ns/ext/worker/worker.h>
 
 #include "midi.h"
+#include "lv2_midi.h"
 
 #define INSTRUMENT_FILE_URI "hey"
 
@@ -21,40 +14,7 @@
 #define SND_SEQ_EVENT_CHANPRESS 0xd0
 #define SND_SEQ_EVENT_PITCHBEND 0xe0
 
-struct urid_t
-{
-    //lv2 stuff
-    LV2_URID m_midi_event;
-    LV2_URID a_blank;
-    LV2_URID a_atom_Sequence;
-    LV2_URID a_float;
-    LV2_URID a_long;
-    LV2_URID a_object;
-    LV2_URID a_path;
-    LV2_URID a_urid;
-    LV2_URID t_time;
-    LV2_URID t_beatsperbar;
-    LV2_URID t_bpm;
-    LV2_URID t_speed;
-    LV2_URID t_frame;
-    LV2_URID t_framespersec;
-    LV2_URID patch_Set;
-    LV2_URID patch_Get;
-    LV2_URID patch_property;
-    LV2_URID patch_value;
-    LV2_URID filetype_instr;
-};
 
-struct lmidi
-{
-    struct urid_t urid;
-    char* filepath;//this seems hacky to keep it here, but its the easiest way
-    LV2_Atom_Sequence* atom_in_p;//for host to tell us what file to load
-    LV2_Atom_Sequence* atom_out_p;//to notify host that what file we've loaded
-    LV2_Atom_Forge forge;
-    LV2_Atom_Forge_Frame atom_frame;
-    LV2_Worker_Schedule* scheduler;
-};
 
 void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 {

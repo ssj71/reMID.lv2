@@ -12,23 +12,19 @@
 #include "sid_instr.h"
 #include "prefs.h"
 
+#ifndef LV2
 struct super
 {
     struct CHIPS* sid_bank;
     struct midi_arrays* midi;
     sid_instrument_t **sid_instr;
 
-#ifndef LV2
     jack_client_t *client;
     jack_port_t *output_port_l;
     jack_port_t *output_port_r;
     char port_names[2][16];
-#else
-    float* outl; //lv2 ports
-	float* outr;
-#endif
-
 };
+#endif
 
 int process(uint32_t nframes, void *arg)
 {
