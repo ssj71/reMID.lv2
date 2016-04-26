@@ -204,6 +204,8 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     if(!s->sid_instr)
         s->sid_instr = default_instrument();
 
+    s->oldmidi = s->newmidi = 0;
+    s->old_sid_instr = s->new_sid_instr = 0;
 
     s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
     srate(fs,s);
@@ -215,30 +217,19 @@ void cleanup_audio(void* arg)
     struct super* s = (struct super*)arg;
     midi_close(s->midi);
     close_instruments(s->sid_instr);
+
+    //in case there was an unfinished operation
+    if(s->oldmidi)
+    	free(s->oldmidi);
+    if(s->newmidi)
+    	free(s->newmidi);
+    if(s->old_sid_instr)
+    	close_instruments(s->old_sid_instr);
+    if(s->new_sid_instr)
+    	close_instruments(s->new_sid_instr);
+
     sid_close(s->sid_bank);
     free(s);
-}
-
-//port setters
-void set_lout(void* arg, float* lout)
-{
-    struct super* s = (struct super*)arg;
-    s->outl = lout;
-}
-void set_rout(void* arg, float* rout)
-{
-    struct super* s = (struct super*)arg;
-    s->outr = rout;
-}
-void set_ain(void* arg, void* ain)
-{
-    struct super* s = (struct super*)arg;
-    lv2_set_atom_in_port(s->midi->seq,ain);
-}
-void set_aout(void* arg, void* aout)
-{
-    struct super* s = (struct super*)arg;
-    lv2_set_atom_out_port(s->midi->seq,aout);
 }
 
 #endif

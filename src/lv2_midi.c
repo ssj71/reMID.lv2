@@ -88,11 +88,11 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
     		else if(event->body.type == lm->urid.a_object)
     		{
 				const LV2_Atom_Object* obj = (const LV2_Atom_Object*)&event->body;
-				if (obj->body.otype == lm->urid.patch_Set)
+				if (obj->body.otype == lm->urid.p_Set)
 				{
 					// Get the property the set message is setting
 					const LV2_Atom* property = NULL;
-					lv2_atom_object_get(obj, lm->urid.patch_property, &property, 0);
+					lv2_atom_object_get(obj, lm->urid.p_property, &property, 0);
 					if (property && property->type == lm->urid.a_urid)
 					{
 						const uint32_t key = ((const LV2_Atom_URID*)property)->body;
@@ -102,7 +102,7 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 							lm->scheduler->schedule_work(lm->scheduler->handle, lv2_atom_total_size(&event->body), &event->body);
 #if(0)
 							const LV2_Atom* file_path;
-							lv2_atom_object_get(&event->body, lm->urid.patch_value, &file_path, 0);
+							lv2_atom_object_get(&event->body, lm->urid.p_value, &file_path, 0);
 							if (file_path && file_path->type == lm->urid.a_path)
 							{
 								// Load file.
@@ -114,16 +114,16 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
 						}//property is rvb file
 					}//property is URID
 				}
-				else if (obj->body.otype == lm->urid.patch_Get)
+				else if (obj->body.otype == lm->urid.p_Get)
 				{
 					// Received a get message, emit our state (probably to UI)
 					lv2_atom_forge_frame_time(&lm->forge, event->time.frames );//use current event's time
 					LV2_Atom_Forge_Frame frame;
-					lv2_atom_forge_object( &lm->forge, &frame, 0, lm->urid.patch_Set);
+					lv2_atom_forge_object( &lm->forge, &frame, 0, lm->urid.p_Set);
 
-					lv2_atom_forge_key(&lm->forge, lm->urid.patch_property);
+					lv2_atom_forge_key(&lm->forge, lm->urid.p_property);
 					lv2_atom_forge_urid(&lm->forge, lm->urid.filetype_instr);
-					lv2_atom_forge_key(&lm->forge, lm->urid.patch_value);
+					lv2_atom_forge_key(&lm->forge, lm->urid.p_value);
 					lv2_atom_forge_path(&lm->forge, lm->filepath, strlen(lm->filepath)+1);
 
 					lv2_atom_forge_pop(&lm->forge, &frame);
@@ -156,10 +156,10 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.t_speed = urid_map->map(urid_map->handle, LV2_TIME__speed);
                 lm->urid.t_frame = urid_map->map(urid_map->handle, LV2_TIME__frame);
                 lm->urid.t_framespersec = urid_map->map(urid_map->handle, LV2_TIME__framesPerSecond);
-                lm->urid.patch_Set = urid_map->map(urid_map->handle,LV2_PATCH__Set);
-                lm->urid.patch_Get = urid_map->map(urid_map->handle,LV2_PATCH__Get);
-                lm->urid.patch_property = urid_map->map(urid_map->handle,LV2_PATCH__property);
-                lm->urid.patch_value = urid_map->map(urid_map->handle,LV2_PATCH__value);
+                lm->urid.p_Set = urid_map->map(urid_map->handle,LV2_PATCH__Set);
+                lm->urid.p_Get = urid_map->map(urid_map->handle,LV2_PATCH__Get);
+                lm->urid.p_property = urid_map->map(urid_map->handle,LV2_PATCH__property);
+                lm->urid.p_value = urid_map->map(urid_map->handle,LV2_PATCH__value);
                 lm->urid.filetype_instr = urid_map->map(urid_map->handle,INSTRUMENT_FILE_URI);
                 break;
             }
@@ -170,6 +170,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
         }
     }
     strcpy(lm->filepath,"instruments.conf");//default path is in bundle
+    strcpy(lm->newfilepath,"");//not loading anything
     return (void*)lm;
 }
 
@@ -177,22 +178,4 @@ void lv2_close_seq(void* mseq)
 {
     struct lmidi* lm = (struct lmidi*)mseq;
     free(lm);
-}
-
-void lv2_set_atom_in_port(void* mseq, void* port)
-{
-    struct lmidi* lm = (struct lmidi*)mseq;
-    lm->atom_in_p = (LV2_Atom_Sequence*)port;
-}
-
-void lv2_set_atom_out_port(void* mseq, void* port)
-{
-    struct lmidi* lm = (struct lmidi*)mseq;
-    lm->atom_out_p = (LV2_Atom_Sequence*)port;
-}
-
-char** lv2_get_file_string(void* mseq)
-{
-    struct lmidi* lm = (struct lmidi*)mseq;
-    return &(lm->filepath);
 }

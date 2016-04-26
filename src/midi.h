@@ -59,5 +59,6 @@ void note_on(midi_arrays_t* midi, int channel, int note, int velocity);
 void note_off(midi_arrays_t* midi, int channel, int note);
 void silence_all(midi_key_state_t **midi_keys);
 void midi_close(midi_arrays_t* midi, int polyphony);
+midi_arrays_t* new_midi_arrays(midi_arrays_t* old_midi, int polyphony);
 
 #endif
