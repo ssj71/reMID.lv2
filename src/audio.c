@@ -212,6 +212,18 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     return (void*)s;
 }
 
+void* reinit_LV2_audio(void* arg, uint8_t polyphony, uint8_t use_sid_vol, uint16_t chiptype)
+{
+    struct super* s = (struct super*)arg;
+	if(polyphony || use_sid_vol || chiptype)
+	{
+		//handle every in-between case?
+
+	}
+
+
+}
+
 void cleanup_audio(void* arg)
 {
     struct super* s = (struct super*)arg;

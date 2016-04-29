@@ -29,7 +29,7 @@ struct CHIPS
 extern "C" {
 #endif
 
-struct CHIPS *sid_init(int polyphony, int use_sid_volume, int debug);
+struct CHIPS *sid_init(int polyphony, int use_sid_volume, int chiptype, int debug);
 void sid_close(struct CHIPS *chips);
 void sid_set_srate(struct CHIPS *chips, int pal, double sample_freq);
 short *sid_process(struct CHIPS *chips, struct midi_arrays* midi, sid_instrument_t **sid_instr, int num_samples);

@@ -4,7 +4,10 @@
 #include "midi.h"
 #include "lv2_midi.h"
 
-#define INSTRUMENT_FILE_URI "hey"
+#define INSTRUMENT_FILE_URI "http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf"
+#define POLYPHONY_URI "polyphony"
+#define CHIPTYPE_URI "chip_type"
+#define USE_SID_VOL_URI "use_sid_volume"
 
 #define SND_SEQ_EVENT_NOTEOFF 0x80
 #define SND_SEQ_EVENT_NOTEON 0x90
@@ -161,6 +164,9 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.p_property = urid_map->map(urid_map->handle,LV2_PATCH__property);
                 lm->urid.p_value = urid_map->map(urid_map->handle,LV2_PATCH__value);
                 lm->urid.filetype_instr = urid_map->map(urid_map->handle,INSTRUMENT_FILE_URI);
+                lm->urid.polyphony = urid_map->map(urid_map->handle,POLYPHONY_URI);
+                lm->urid.chiptype = urid_map->map(urid_map->handle,CHIPTYPE_URI);
+                lm->urid.use_sid_vol = urid_map->map(urid_map->handle,USE_SID_VOL_URI);
                 break;
             }
         }

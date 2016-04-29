@@ -9,9 +9,6 @@
 #include "lv2_midi.h"
 
 #define REMID_URI "http://github.com/ssj71/reMID.lv2"
-#ifndef MAX_POLYPHONY
-#define MAX_POLYPHONY 32
-#endif
 #define LV2
 
 
@@ -145,6 +142,48 @@ static LV2_State_Status remidsave(LV2_Handle handle, LV2_State_Store_Function  s
 static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Function retrieve,
 		LV2_State_Handle state_handle, uint32_t flags, const LV2_Feature* const* features)
 {
+	struct super* s = (struct super*)handle;
+	struct lmidi* lm = s->midi->seq;
+    size_t   size;
+    uint32_t type;
+    uint32_t valflags;
+    uint8_t polyphony=32,vol=0;
+    uint16_t chiptype=0;
+    char* path = 0;
+
+    const void* value = retrieve( state_handle, lm->urid.filetype_instr, &size, &type, &valflags);
+    if (value)
+		path = (char*)value;
+
+    value = retrieve( state_handle, lm->urid.polyphony, &size, &type, &valflags);
+    if (value)
+		polyphony = *((uint8_t*)value);
+
+    value = retrieve( state_handle, lm->urid.use_sid_vol, &size, &type, &valflags);
+    if (value)
+		vol = *((uint8_t*)value);
+
+    value = retrieve( state_handle, lm->urid.chiptype, &size, &type, &valflags);
+    if (value)
+		chiptype = *((uint16_t*)value);
+
+    if(s->oldmidi)
+    	free(s->oldmidi);
+    if(s->old_sid_instr)
+    	close_instruments(s->old_sid_instr);
+    s->oldmidi = 0;
+    s->old_sid_instr = 0;
+    if(s->newmidi && s->newmidi != s->midi)
+    {
+    	//was loading a file, but this will supersede
+    	free(s->newmidi);
+    	close_instruments(s->new_sid_instr);
+    }
+
+    //so how to apply these new settings?
+
+
+    return LV2_STATE_SUCCESS;
 
 }
 

@@ -35,6 +35,9 @@ struct urid_t
     LV2_URID p_property;
     LV2_URID p_value;
     LV2_URID filetype_instr;
+    LV2_URID polyphony;
+    LV2_URID chiptype;
+    LV2_URID use_sid_vol;
 };
 
 struct lmidi
