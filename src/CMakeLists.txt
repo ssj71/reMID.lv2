@@ -4,7 +4,8 @@ cmake_minimum_required(VERSION 2.8)
 
 project (reMID)
 
-set(CMAKE_C_FLAGS "-Wall -g -std=c99 -DPREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -DPREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
+#set(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} -Wall -g -fPIC ")
 
 # check for our various libraries
 find_package(PkgConfig)
@@ -65,12 +66,25 @@ add_library(remid.lv2 SHARED
     prefs.c
     sid_chips.cc
 )
+set_target_properties(remid.lv2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+#SET_TARGET_PROPERTIES(remid.lv2 PROPERTIES COMPILE_FLAGS "-fPIC")
+#add_definitions(-fPIC)
     
+#set_target_properties(remid.lv2 PROPERTIES PREFIX "")
+#set_target_properties(remid.lv2 PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 
 target_link_libraries(reMID ${JACK_LIBRARIES} ${GLIB_LIBARIES} ${RESID_LIBARIES} glib-2.0 m resid)
+target_link_libraries(remid.lv2 ${LV2_LIBRARIES} ${GLIB_LIBARIES} ${RESID_LIBARIES} glib-2.0 m resid)
 
 # config install
 install(TARGETS reMID
   DESTINATION bin
 )
 
+install(TARGETS remid.lv2
+  LIBRARY
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/lv2/remid.lv2
+)
+install (FILES manifest.ttl reMID.ttl
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/lv2/remid.lv2
+)
