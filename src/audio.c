@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 
+//#define LV2
 #ifndef LV2
 #include <jack/jack.h>
 #include "jack_audio.h"
@@ -134,7 +135,7 @@ void jack_connect_ports(jack_client_t *client, char port_names[][16], char** jac
     }
 }
 
-int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file)
+int init_jack_audio( int use_sid_volume, int max_polyphony, int chiptype, int debug, char** jack_connect_args, char** midi_connect_args, char* instr_file)
 {
 
     struct super *s = malloc(sizeof(struct super));
@@ -156,7 +157,7 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int debug, char** ja
         s->sid_instr = default_instrument();
 
 
-    s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
+    s->sid_bank = sid_init(max_polyphony, use_sid_volume,chiptype, debug);
 
     jack_set_process_callback(s->client, process, s);
     jack_set_sample_rate_callback(s->client, srate, s);
@@ -210,18 +211,6 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
     srate(fs,s);
     return (void*)s;
-}
-
-void* reinit_LV2_audio(void* arg, uint8_t polyphony, uint8_t use_sid_vol, uint16_t chiptype)
-{
-    struct super* s = (struct super*)arg;
-	if(polyphony || use_sid_vol || chiptype)
-	{
-		//handle every in-between case?
-
-	}
-
-
 }
 
 void cleanup_audio(void* arg)

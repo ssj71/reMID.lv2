@@ -2,7 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
+//#include <pthread.h>
+#include <getopt.h>
 
 #ifdef GUI
 #include "gui.h"
@@ -32,6 +33,7 @@ void usage(char *prgname)
            "-i	<path>	select instrument configuration file\n"
            "-j <client:port>	connect audio output to JACK port, may be specified multiple times\n"
            "-m <client:port>	connect MIDI input to output from client:port\n"
+           "-c <6581|8580>		select SID chip model\n"
 #ifdef GUI
            "-n			disable gui\n"
 #endif
@@ -45,16 +47,17 @@ void usage(char *prgname)
 int main(int argc, char **argv)
 {
     int c, use_sid_volume=0, max_poly = MAX_POLYPHONY;
-    pthread_t gui_thread;
-    int use_gui;
+////    pthread_t gui_thread;
+//    int use_gui;
     int pt_debug;
+    int chiptype = 0;
     char *midi_connect_args[255];
     char *jack_connect_args[255];
     char *instr_file = "instruments.conf";
     jack_connect_args[0] = NULL;
     midi_connect_args[0] = NULL;
 
-    while((c = getopt(argc, argv, "dhj:m:np:i:s:"))!=-1)
+    while((c = getopt(argc, argv, "dhj:m:c:p:i:s:"))!=-1)
     {
         switch (c)
         {
@@ -70,9 +73,14 @@ int main(int argc, char **argv)
         case 'm':
             add_connect(midi_connect_args,optarg);
             break;
+#ifdef GUI
         case 'n':
             use_gui = 0;
             break;
+#endif
+        case 'c':
+        	chiptype = atoi(optarg);
+        	break;
         case 'p':
             max_poly = atoi(optarg);
             break;
@@ -99,7 +107,7 @@ int main(int argc, char **argv)
     if(max_poly > 128)
         max_poly = 128;
 
-    init_jack_audio(use_sid_volume, max_poly, pt_debug, jack_connect_args, midi_connect_args, instr_file);
+    init_jack_audio(use_sid_volume, max_poly, chiptype, pt_debug, jack_connect_args, midi_connect_args, instr_file);
 
 #ifdef GUI
     if(use_gui)

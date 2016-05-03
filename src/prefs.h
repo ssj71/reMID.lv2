@@ -31,6 +31,7 @@ void prefs_set_polyphony(int value);
 
 
 sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi);
+sid_instrument_t** default_instrument();//midi_arrays_t *midi);
 void close_instruments(sid_instrument_t ** sid_instr);
 
 #endif

@@ -147,22 +147,25 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
     size_t   size;
     uint32_t type;
     uint32_t valflags;
-    uint8_t polyphony=32,vol=0;
-    uint16_t chiptype=0;
+    uint8_t polyphony,vol;
+    uint16_t chiptype;
     char* path = 0;
 
     const void* value = retrieve( state_handle, lm->urid.filetype_instr, &size, &type, &valflags);
     if (value)
 		path = (char*)value;
 
+    polyphony = s->sid_bank->polyphony;
     value = retrieve( state_handle, lm->urid.polyphony, &size, &type, &valflags);
     if (value)
 		polyphony = *((uint8_t*)value);
 
+    vol = s->sid_bank->use_sid_volume;
     value = retrieve( state_handle, lm->urid.use_sid_vol, &size, &type, &valflags);
     if (value)
 		vol = *((uint8_t*)value);
 
+    chiptype = s->sid_bank->chiptype;
     value = retrieve( state_handle, lm->urid.chiptype, &size, &type, &valflags);
     if (value)
 		chiptype = *((uint16_t*)value);
@@ -180,7 +183,14 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
     	close_instruments(s->new_sid_instr);
     }
 
-    //so how to apply these new settings?
+    //only reinit if something has changed
+    if(polyphony != s->sid_bank->polyphony
+    		|| vol != s->sid_bank->use_sid_volume
+			|| chiptype != s->sid_bank->chiptype)
+    {
+    	sid_close(s->sid_bank);
+		s->sid_bank = sid_init(polyphony,vol,chiptype,0);
+    }
 
 
     return LV2_STATE_SUCCESS;

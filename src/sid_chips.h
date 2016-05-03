@@ -12,6 +12,7 @@ struct CHIPS
     int polyphony;
     int use_sid_volume;
     int pt_debug;
+    int chiptype;
 
     short *buf;
     int buf_length;

@@ -39,10 +39,14 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     {
         self->sid_chips[i] = new SID();
 
+        self->chiptype = chiptype;
         if(chiptype == 6581)
 			self->sid_chips[i]->set_chip_model(MOS6581);
         else
+        {
 			self->sid_chips[i]->set_chip_model(MOS8580);
+			self->chiptype = 8580;
+        }
         self->sid_chips[i]->reset();
 
         // initialise SID volume to max if we're not doing volume at the SID level
