@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project (reMID)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -DPREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -DPREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
 #set(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} -Wall -g -fPIC ")
 
 # check for our various libraries
@@ -59,14 +59,15 @@ add_executable(reMID
 
 #add_definitions(-DLV2_PLUGIN)
 add_library(remid.lv2 SHARED
+    sid_chips.cc
     reMID_lv2.c
     audio.c
     lv2_midi.c
     midi.c
     prefs.c
-    sid_chips.cc
 )
-set_target_properties(remid.lv2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
+#set_target_properties(remid.lv2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 #SET_TARGET_PROPERTIES(remid.lv2 PROPERTIES COMPILE_FLAGS "-fPIC")
 #add_definitions(-fPIC)
     
