@@ -13,13 +13,34 @@
 @prefix param: <http://lv2plug.in/ns/ext/parameters#> .
 @prefix units: <http://lv2plug.in/ns/extensions/units#> .
 @prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
+@prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
 
 
-http://github.com/ssj71/reMID.lv2>
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf>
+    a lv2:Parameter ;
+    rdfs:label "intrument file" ;
+    rdfs:range atom:Path ;
+    mediatype: mime:text ;
+    .
+<polyphony>
+    a lv2:Parameter ;
+    rdfs:range atom:Int ;
+    .
+<chip_type>
+    a lv2:Parameter ;
+    rdfs:range atom:Int ;
+    .
+<use_sid_volume>
+    a lv2:Parameter ;
+    rdfs:range atom:Bool ;
+    .
+
+
+<http://github.com/ssj71/reMID.lv2>
         a lv2:Plugin, lv2:InstrumentPlugin ;
         doap:name "reMID" ;
         doap:license <http://opensource.org/licenses/GPL-2.0> ;
-        doap:description "Emulation of a SID chip";
+        doap:description "Midi controlled emulation of a SID chip";
         doap:maintainer [
                 foaf:name "Spencer Jackson" ;
                 foaf:homepage <http://ssj71.github.io/infamousPlugins> ;
@@ -28,8 +49,10 @@ http://github.com/ssj71/reMID.lv2>
         lv2:minorVersion 0 ;
         lv2:microVersion 1 ;
         rdfs:comment "This midi controlled SID emulator loads instrument files that control the chip for internal, per-note automation. It also allows for chiptune drumkits to be loaded." ;
-        lv2:requiredFeature <http://lv2plug.in/ns/ext/urid#map> ;
-        lv2:optionalFeature lv2:hardRTCapable ;
+        lv2:requiredFeature urid:map, worker:schedule ;
+        lv2:optionalFeature lv2:hardRTCapable, state:loadDefaultState ;
+        lv2:extensionData worker:interface, state:interface ;
+        patch:writable <http://rakarrack.sourceforge.net/effects.html#Echotron:dlyfile> ;
 
         lv2:port [
                 a lv2:OutputPort, lv2:AudioPort ;
@@ -47,6 +70,8 @@ http://github.com/ssj71/reMID.lv2>
                 a lv2:InputPort, lv2atom:AtomPort ;
                 lv2atom:bufferType lv2atom:Sequence ;
                 lv2atom:supports lv2midi:MidiEvent ;
+                lv2atom:supports patch:Message ;
+                lv2:designation lv2:control ;
 #                lv2atom:supports lv2time:Position ;
                 lv2:index 2 ;
                 lv2:symbol "MIDI_IN";
@@ -55,13 +80,21 @@ http://github.com/ssj71/reMID.lv2>
         lv2:port [
                 a lv2:OutputPort, lv2atom:AtomPort ;
                 lv2atom:bufferType lv2atom:Sequence ;
+                lv2atom:supports patch:Message ;
+                lv2:designation lv2:control ;
                 lv2:index 3 ;
                 lv2:symbol "NOTIFY";
                 lv2:name "Notify";
+        ] ;
+        state:state [
+            <http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf> <instruments.conf> ;
+            <polyphony> 32 ; # max 128
+            <chip_type> 8580 ; # other option is 6581, it has a few more idiosyncacies
+            <use_sid_volume> 0 ; # this selects whether to use the chip's volume for velocity or use a higher resolution external volume control
         ].
 
-<http://ssj71.github.io/infamousPlugins/plugs.html#casynth:preset:00Dfault>
-        a pset:Preset ;
-        lv2:appliesTo <http://ssj71.github.io/infamousPlugins/plugs.html#casynth> ;
-        rdfs:label "00 Dfault" ;
-        rdfs:seeAlso <casynth_presets.ttl> .
+#<http://github.com/ssj71/reMID.lv2>
+#        a pset:Preset ;
+#        lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+#        rdfs:label "00 Dfault" ;
+#        rdfs:seeAlso <presets.ttl> .

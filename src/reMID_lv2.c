@@ -159,17 +159,17 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
     polyphony = s->sid_bank->polyphony;
     value = retrieve( state_handle, lm->urid.polyphony, &size, &type, &valflags);
     if (value)
-		polyphony = *((uint8_t*)value);
+		polyphony = (uint8_t)*((int32_t*)value);
 
     vol = s->sid_bank->use_sid_volume;
     value = retrieve( state_handle, lm->urid.use_sid_vol, &size, &type, &valflags);
     if (value)
-		vol = *((uint8_t*)value);
+		vol = (uint8_t)*((int32_t*)value);
 
     chiptype = s->sid_bank->chiptype;
     value = retrieve( state_handle, lm->urid.chiptype, &size, &type, &valflags);
     if (value)
-		chiptype = *((uint16_t*)value);
+		chiptype = (uint16_t)*((int32_t*)value);
 
     if(path)
     {
