@@ -411,7 +411,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
     for(i=0; sid_instr[i]; i++)
     {
         sid_instrument_t *instr = sid_instr[i];
-        if(!instr->type==PERCUSSION_MAP) continue;
+        if(instr->type!=PERCUSSION_MAP) continue;
         for(j=0; j<128; j++)
         {
             instr->percussion_map[j] = -1;

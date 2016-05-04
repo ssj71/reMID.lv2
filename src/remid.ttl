@@ -6,7 +6,7 @@
 @prefix lv2:     <http://lv2plug.in/ns/lv2core#> .
 @prefix lv2ui:   <http://lv2plug.in/ns/extensions/ui#> .
 @prefix pset: <http://lv2plug.in/ns/ext/presets#> .
-@prefix lv2atom: <http://lv2plug.in/ns/ext/atom#> .
+@prefix atom: <http://lv2plug.in/ns/ext/atom#> .
 @prefix lv2midi: <http://lv2plug.in/ns/ext/midi#> .
 @prefix lv2time: <http://lv2plug.in/ns/ext/time#> .
 @prefix pg: <http://lv2plug.in/ns/ext/port-groups#> .
@@ -14,6 +14,9 @@
 @prefix units: <http://lv2plug.in/ns/extensions/units#> .
 @prefix pprops: <http://lv2plug.in/ns/ext/port-props#> .
 @prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
+@prefix worker:  <http://lv2plug.in/ns/ext/worker#> .
+@prefix state:  <http://lv2plug.in/ns/ext/state#> .
+@prefix patch: <http://lv2plug.in/ns/ext/patch#> .
 
 
 <http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf>
@@ -67,20 +70,20 @@
                 lv2:name "Left Out" ;
         ] ;
         lv2:port [
-                a lv2:InputPort, lv2atom:AtomPort ;
-                lv2atom:bufferType lv2atom:Sequence ;
-                lv2atom:supports lv2midi:MidiEvent ;
-                lv2atom:supports patch:Message ;
+                a lv2:InputPort, atom:AtomPort ;
+                atom:bufferType atom:Sequence ;
+                atom:supports lv2midi:MidiEvent ;
+                atom:supports patch:Message ;
                 lv2:designation lv2:control ;
-#                lv2atom:supports lv2time:Position ;
+#                atom:supports lv2time:Position ;
                 lv2:index 2 ;
                 lv2:symbol "MIDI_IN";
                 lv2:name "MIDI In";
         ] ;
         lv2:port [
-                a lv2:OutputPort, lv2atom:AtomPort ;
-                lv2atom:bufferType lv2atom:Sequence ;
-                lv2atom:supports patch:Message ;
+                a lv2:OutputPort, atom:AtomPort ;
+                atom:bufferType atom:Sequence ;
+                atom:supports patch:Message ;
                 lv2:designation lv2:control ;
                 lv2:index 3 ;
                 lv2:symbol "NOTIFY";

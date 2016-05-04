@@ -57,7 +57,7 @@ add_executable(reMID
     sid_chips.cc
 )
 
-#add_definitions(-DLV2_PLUGIN)
+#add_definitions(-DLV2)
 add_library(remid.lv2 SHARED
     sid_chips.cc
     reMID_lv2.c
@@ -69,8 +69,8 @@ add_library(remid.lv2 SHARED
 
 #set_target_properties(remid.lv2 PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 #SET_TARGET_PROPERTIES(remid.lv2 PROPERTIES COMPILE_FLAGS "-fPIC")
-#add_definitions(-fPIC)
     
+SET_TARGET_PROPERTIES(remid.lv2 PROPERTIES COMPILE_FLAGS -DLV2)
 set_target_properties(remid.lv2 PROPERTIES PREFIX "")
 #set_target_properties(remid.lv2 PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 
@@ -86,6 +86,6 @@ install(TARGETS remid.lv2
   LIBRARY
   DESTINATION lib/lv2/remid.lv2
 )
-install (FILES manifest.ttl reMID.ttl
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/lv2/remid.lv2
+install (FILES manifest.ttl remid.ttl ../instruments.conf
+  DESTINATION lib/lv2/remid.lv2
 )

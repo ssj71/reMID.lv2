@@ -10,7 +10,6 @@
 #include "lv2_midi.h"
 
 #define REMID_URI "http://github.com/ssj71/reMID.lv2"
-#define LV2
 
 
 

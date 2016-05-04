@@ -187,14 +187,15 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int chiptype, int de
 }
 
 #else
-void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
+void* init_lv2_audio(uint32_t fs, const LV2_Feature * const* host_features)
 {
 
     struct super *s = malloc(sizeof(struct super));
-    char midi_connect_args[2] = "";
+    char* midi_connect_args[1] = {0};
     char instr_file[25] = "instruments.conf";
     int max_polyphony = 32;
     int use_sid_volume = 0;
+    int chiptype = 8580;
     int debug = 0;
 
     s->midi = init_midi((void*)host_features, max_polyphony, midi_connect_args);//TODO: make sure this doesn't clobber the instrument stuff
@@ -208,7 +209,7 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     s->oldmidi = s->newmidi = 0;
     s->old_sid_instr = s->new_sid_instr = 0;
 
-    s->sid_bank = sid_init(max_polyphony, use_sid_volume, debug);
+    s->sid_bank = sid_init(max_polyphony, use_sid_volume, chiptype, debug);
     srate(fs,s);
     return (void*)s;
 }
@@ -216,7 +217,7 @@ void* init_LV2_audio(uint32_t fs, const LV2_Feature * const* host_features)
 void cleanup_audio(void* arg)
 {
     struct super* s = (struct super*)arg;
-    midi_close(s->midi);
+    midi_close(s->midi,s->sid_bank->polyphony);
     close_instruments(s->sid_instr);
 
     //in case there was an unfinished operation
