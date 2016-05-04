@@ -71,7 +71,7 @@ add_library(remid.lv2 SHARED
 #SET_TARGET_PROPERTIES(remid.lv2 PROPERTIES COMPILE_FLAGS "-fPIC")
 #add_definitions(-fPIC)
     
-#set_target_properties(remid.lv2 PROPERTIES PREFIX "")
+set_target_properties(remid.lv2 PROPERTIES PREFIX "")
 #set_target_properties(remid.lv2 PROPERTIES BUILD_WITH_INSTALL_RPATH TRUE)
 
 target_link_libraries(reMID resid ${JACK_LIBRARIES} ${GLIB_LIBARIES} glib-2.0 m resid)
@@ -84,7 +84,7 @@ install(TARGETS reMID
 
 install(TARGETS remid.lv2
   LIBRARY
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/lv2/remid.lv2
+  DESTINATION lib/lv2/remid.lv2
 )
 install (FILES manifest.ttl reMID.ttl
   DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/lv2/remid.lv2
