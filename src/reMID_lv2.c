@@ -5,6 +5,7 @@
 #include <math.h>
 
 
+#include "prefs.h"
 #include "lv2_audio.h"
 #include "lv2_midi.h"
 
@@ -130,7 +131,7 @@ static LV2_State_Status remidsave(LV2_Handle handle, LV2_State_Store_Function  s
 
     char* abstractpath = map_path->abstract_path(map_path->handle, lm->filepath);
 
-    store(state_handle, lm->filepath, abstractpath, strlen(lm->filepath) + 1,
+    store(state_handle, lm->urid.filetype_instr, abstractpath, strlen(lm->filepath) + 1,
     		lm->urid.a_path, LV2_STATE_IS_POD | LV2_STATE_IS_PORTABLE);
 
     free(abstractpath);
@@ -170,17 +171,31 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
     if (value)
 		chiptype = *((uint16_t*)value);
 
-    if(s->oldmidi)
-    	free(s->oldmidi);
-    if(s->old_sid_instr)
-    	close_instruments(s->old_sid_instr);
-    s->oldmidi = 0;
-    s->old_sid_instr = 0;
-    if(s->newmidi && s->newmidi != s->midi)
+    if(path)
     {
-    	//was loading a file, but this will supersede
-    	free(s->newmidi);
-    	close_instruments(s->new_sid_instr);
+		if(s->oldmidi)
+			free(s->oldmidi);
+		if(s->old_sid_instr)
+			close_instruments(s->old_sid_instr);
+		s->oldmidi = 0;
+		s->old_sid_instr = 0;
+		if(s->newmidi && s->newmidi != s->midi)
+		{
+			//was loading a file, but this will supersede
+			free(s->newmidi);
+			close_instruments(s->new_sid_instr);
+		}
+		s->newmidi = 0;
+		s->new_sid_instr = 0;
+
+		s->oldmidi = s->midi;
+		s->old_sid_instr = s->sid_instr;
+
+        s->midi = new_midi_arrays(s->oldmidi,s->sid_bank->polyphony);
+        s->sid_instr = read_instruments(path,s->midi);
+        free(s->oldmidi);
+		close_instruments(s->old_sid_instr);
+
     }
 
     //only reinit if something has changed
@@ -232,4 +247,5 @@ const LV2_Descriptor* lv2_descriptor(uint32_t index)
     case 0:
         return &remid_lv2_descriptor ;
     }
+    return 0;
 }

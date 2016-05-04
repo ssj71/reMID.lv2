@@ -1,5 +1,6 @@
 //spencer jackson
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "midi.h"
 #include "lv2_midi.h"

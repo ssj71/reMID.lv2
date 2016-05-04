@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <pthread.h>
 #include <glib.h>
+#include <wchar.h>
 
 #include "sid_instr.h"
 #include "midi.h"
