@@ -1,11 +1,8 @@
 V1
-cleanup warnings
-LV2-ize
 fix default instrument
 add opcodes for voice detune (is freq. resolution fine enough? I think so)
 add env3tofilter opcode
 add osc3tofilter opcode
-make max polyphony an instantiation option
 
 V2 - single voice, no perc. mode :(
 perhaps should add N voices in GUI that allows unison, perc, or preset mode (default)
@@ -22,7 +19,7 @@ python utiil  to convert banks to lv2 states
 
 
 __GUI__
-V1 - file selector
+V1 - file selector. Thats all.
 
 V2 
 voice polyphony,
@@ -53,3 +50,5 @@ output
 osc3
 env3
 
+__Parser__
+space after instrument name can create a non-match

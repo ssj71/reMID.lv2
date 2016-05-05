@@ -86,6 +86,6 @@ install(TARGETS remid.lv2
   LIBRARY
   DESTINATION lib/lv2/remid.lv2
 )
-install (FILES manifest.ttl remid.ttl ../instruments.conf
+install (FILES manifest.ttl remid.ttl
   DESTINATION lib/lv2/remid.lv2
 )

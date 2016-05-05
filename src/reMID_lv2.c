@@ -67,7 +67,7 @@ static LV2_Worker_Status remidwork(LV2_Handle handle, LV2_Worker_Respond_Functio
 	struct super* s = (struct super*)handle;
 	struct lmidi* lm = s->midi->seq;
     LV2_Atom_Object* obj = (LV2_Atom_Object*)data;
-    const LV2_Atom* file_path;
+    const LV2_Atom* file_path = NULL;
 
     //if we're here, then we will need a new file, get rid of old ones
     while(s->newmidi){usleep(1000);}//wait if in the middle of switching files
