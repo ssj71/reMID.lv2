@@ -26,6 +26,29 @@
 //int num_instrs;
 //sid_instrument_t **sid_instr=NULL;
 
+//some non-standard functions that I'll just include here for portability
+char* strsep( char** stringp, const char* delim )
+{
+  char* result;
+
+  if ((stringp == NULL) || (*stringp == NULL)) return NULL;
+
+  result = *stringp;
+
+  while (**stringp && strchr( delim, **stringp )) ++*stringp;
+
+  if (**stringp) *(*stringp)++ = '\0';
+  else             *stringp    = NULL;
+
+  return result;
+}
+char *strdup (const char *s)
+{
+    char *d = malloc (strlen (s) + 1);   // Space for length plus nul
+    if (d == NULL) return NULL;          // No memory
+    strcpy (d,s);                        // Copy the characters
+    return d;                            // Return the new string
+}
 
 // requires init_jack_audio() to take effect
 void prefs_set_polyphony(int value)
@@ -127,7 +150,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
     sid_instrument_t** sid_instr;
 
     inst_config = g_key_file_new();
-    printf("loading %s",path);
+    printf("loading %s\n",path);
     i = g_key_file_load_from_file(inst_config, path,
                                 G_KEY_FILE_KEEP_COMMENTS, NULL);
     if(!i)

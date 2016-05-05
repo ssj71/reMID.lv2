@@ -5,7 +5,7 @@
 #include "midi.h"
 #include "lv2_midi.h"
 
-#define INSTRUMENT_FILE_URI "http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf"
+#define INSTRUMENT_FILE_URI "http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf"
 #define POLYPHONY_URI "polyphony"
 #define CHIPTYPE_URI "chip_type"
 #define USE_SID_VOL_URI "use_sid_volume"

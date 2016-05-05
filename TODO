@@ -1,6 +1,7 @@
 V1
 fix default instrument
 add opcodes for voice detune (is freq. resolution fine enough? I think so)
+add filter_cutmod opcode //will this work since its linear freq?
 add env3tofilter opcode
 add osc3tofilter opcode
 

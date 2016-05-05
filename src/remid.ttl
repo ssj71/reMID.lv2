@@ -19,11 +19,10 @@
 @prefix patch: <http://lv2plug.in/ns/ext/patch#> .
 
 
-<http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf>
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf>
     a lv2:Parameter ;
     rdfs:label "intrument file" ;
     rdfs:range atom:Path ;
-    mediatype: mime:text ;
     .
 <polyphony>
     a lv2:Parameter ;
@@ -55,7 +54,7 @@
         lv2:requiredFeature urid:map, worker:schedule ;
         lv2:optionalFeature lv2:hardRTCapable, state:loadDefaultState ;
         lv2:extensionData worker:interface, state:interface ;
-        patch:writable <http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf> ;
+        patch:writable <http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> ;
 
         lv2:port [
                 a lv2:OutputPort, lv2:AudioPort ;
@@ -90,14 +89,65 @@
                 lv2:name "Notify";
         ] ;
         state:state [
-            <http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf> <instruments.conf> ;
+            <http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <instruments.conf> ;
             <polyphony> 32 ; # max 128
             <chip_type> 8580 ; # other option is 6581, it has a few more idiosyncacies
             <use_sid_volume> 0 ; # this selects whether to use the chip's volume for velocity or use a higher resolution external volume control
         ].
 
-#<http://github.com/ssj71/reMID.lv2>
-#        a pset:Preset ;
-#        lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
-#        rdfs:label "00 Dfault" ;
-#        rdfs:seeAlso <presets.ttl> .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/bass_big0c.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "bass_big0c" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <bass_big0c.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/bubbley.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "bubbley" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <bubbley.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/digital_spill.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "digital_spill" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <digital_spill.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/octave_siren.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "octave_siren" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <octave_siren.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/organ.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "organ" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <organ.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/piano.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "piano" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <piano.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/saw2sqr.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "saw2sqr" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <saw2sqr.conf>
+	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/sqr2saw.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "sqr2saw" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <sqr2saw.conf>
+	] .
