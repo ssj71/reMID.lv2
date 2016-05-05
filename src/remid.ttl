@@ -55,7 +55,7 @@
         lv2:requiredFeature urid:map, worker:schedule ;
         lv2:optionalFeature lv2:hardRTCapable, state:loadDefaultState ;
         lv2:extensionData worker:interface, state:interface ;
-        patch:writable <http://rakarrack.sourceforge.net/effects.html#Echotron:dlyfile> ;
+        patch:writable <http://github.com/ssj71/reMID.lv2/blob/master/instruments.conf> ;
 
         lv2:port [
                 a lv2:OutputPort, lv2:AudioPort ;

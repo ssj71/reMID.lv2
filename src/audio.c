@@ -187,12 +187,11 @@ int init_jack_audio( int use_sid_volume, int max_polyphony, int chiptype, int de
 }
 
 #else
-void* init_lv2_audio(uint32_t fs, const LV2_Feature * const* host_features)
+void* init_lv2_audio(uint32_t fs, char* instr_file, const LV2_Feature * const* host_features)
 {
 
     struct super *s = malloc(sizeof(struct super));
     char* midi_connect_args[1] = {0};
-    char instr_file[25] = "instruments.conf";
     int max_polyphony = 32;
     int use_sid_volume = 0;
     int chiptype = 8580;
@@ -204,7 +203,7 @@ void* init_lv2_audio(uint32_t fs, const LV2_Feature * const* host_features)
     s->sid_instr = NULL;
 	s->sid_instr = read_instruments(instr_file, s->midi);
     if(!s->sid_instr)
-        s->sid_instr = default_instrument();
+        s->sid_instr = default_instrument();//TODO: this doesn't really work
 
     s->oldmidi = s->newmidi = 0;
     s->old_sid_instr = s->new_sid_instr = 0;

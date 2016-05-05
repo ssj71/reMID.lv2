@@ -25,7 +25,9 @@ typedef struct arugalatastesbad
 
 LV2_Handle init_remid(const LV2_Descriptor *descriptor,double sample_freq, const char *bundle_path,const LV2_Feature * const* host_features)
 {
-    return init_lv2_audio(lrint(sample_freq),host_features);
+	char instr_file[255];
+	sprintf(instr_file,"%sinstruments.conf",bundle_path);//create an absolute path
+    return init_lv2_audio(lrint(sample_freq), instr_file, host_features);
 }
 
 void connect_remid_ports(LV2_Handle handle, uint32_t port, void* data)
@@ -194,6 +196,8 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
         s->sid_instr = read_instruments(path,s->midi);
         free(s->oldmidi);
 		close_instruments(s->old_sid_instr);
+		s->oldmidi = 0;
+		s->old_sid_instr = 0;
 
     }
 

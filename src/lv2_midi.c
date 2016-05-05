@@ -168,10 +168,9 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.polyphony = urid_map->map(urid_map->handle,POLYPHONY_URI);
                 lm->urid.chiptype = urid_map->map(urid_map->handle,CHIPTYPE_URI);
                 lm->urid.use_sid_vol = urid_map->map(urid_map->handle,USE_SID_VOL_URI);
-                break;
             }
         }
-        else if(!strcmp(host_features[i]->URI,LV2_WORKER__schedule))
+        else if(strcmp(host_features[i]->URI,LV2_WORKER__schedule) == 0)
         {
             lm->scheduler = (LV2_Worker_Schedule*)host_features[i]->data;
         }
