@@ -27,7 +27,10 @@ LV2_Handle init_remid(const LV2_Descriptor *descriptor,double sample_freq, const
 {
 	char instr_file[255];
 	sprintf(instr_file,"%sinstruments.conf",bundle_path);//create an absolute path
-    return init_lv2_audio(lrint(sample_freq), instr_file, host_features);
+	struct super* s = init_lv2_audio(lrint(sample_freq), instr_file, host_features);
+	struct lmidi* lm = (struct lmidi*)s->midi->seq;
+	strcpy(lm->filepath,instr_file);
+	return (void*)s;
 }
 
 void connect_remid_ports(LV2_Handle handle, uint32_t port, void* data)
@@ -111,7 +114,7 @@ static LV2_Worker_Status remidwork_response(LV2_Handle handle, uint32_t size, co
 	s->newmidi = 0;
 	s->new_sid_instr = 0;
 	strcpy(lm->filepath,lm->newfilepath);
-	lm->newfilepath[0] = 0;
+	lm->newfilepath[0] = 1; //this special case to notify host
     return LV2_WORKER_SUCCESS;
 }
 //this is not RT
@@ -198,6 +201,8 @@ static LV2_State_Status remidrestore(LV2_Handle handle, LV2_State_Retrieve_Funct
 		close_instruments(s->old_sid_instr);
 		s->oldmidi = 0;
 		s->old_sid_instr = 0;
+		strcpy(lm->filepath,path);
+		lm->newfilepath[0] = 1;
 
     }
 

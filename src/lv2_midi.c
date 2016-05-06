@@ -26,6 +26,30 @@ void lv2_read_midi(void* mseq, uint32_t nframes, midi_arrays_t *midi)
     LV2_Atom_Event event;
     uint8_t* msg;
 
+    // Set up forge to write directly to notify output port.
+    const uint32_t notify_capacity = lm->atom_out_p->atom.size;
+    lv2_atom_forge_set_buffer(&lm->forge, (uint8_t*)lm->atom_out_p, notify_capacity);
+
+    // Start a sequence in the notify output port.
+    lv2_atom_forge_sequence_head(&lm->forge, &lm->atom_frame, 0);
+
+    //tell host if we have a new file
+    if(lm->newfilepath[0] == 1)
+    {
+    	lm->newfilepath[0] = 0;
+		lv2_atom_forge_frame_time(&lm->forge, 0);
+		LV2_Atom_Forge_Frame frame;
+		lv2_atom_forge_object( &lm->forge, &frame, 0, lm->urid.p_Set);
+
+		lv2_atom_forge_key(&lm->forge, lm->urid.p_property);
+		lv2_atom_forge_urid(&lm->forge, lm->urid.filetype_instr);
+		lv2_atom_forge_key(&lm->forge, lm->urid.p_value);
+		lv2_atom_forge_path(&lm->forge, lm->filepath, strlen(lm->filepath)+1);
+
+		lv2_atom_forge_pop(&lm->forge, &frame);
+    }
+
+
     //TODO: not sample accurate
     LV2_ATOM_SEQUENCE_FOREACH(lm->atom_in_p, event)
     {
@@ -168,6 +192,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
                 lm->urid.polyphony = urid_map->map(urid_map->handle,POLYPHONY_URI);
                 lm->urid.chiptype = urid_map->map(urid_map->handle,CHIPTYPE_URI);
                 lm->urid.use_sid_vol = urid_map->map(urid_map->handle,USE_SID_VOL_URI);
+                lv2_atom_forge_init(&lm->forge,urid_map);
             }
         }
         else if(strcmp(host_features[i]->URI,LV2_WORKER__schedule) == 0)
@@ -175,7 +200,7 @@ void* lv2_init_seq(const LV2_Feature * const* host_features)
             lm->scheduler = (LV2_Worker_Schedule*)host_features[i]->data;
         }
     }
-    strcpy(lm->filepath,"instruments.conf");//default path is in bundle
+    //strcpy(lm->filepath,"instruments.conf");//default path is in bundle
     strcpy(lm->newfilepath,"");//not loading anything
     return (void*)lm;
 }
