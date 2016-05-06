@@ -5,8 +5,9 @@
 #include <alloca.h>
 #include <cstdlib>
 #include <stdio.h>
-#include <resid/sid.h>
 
+
+#include "../lib/sid.h"
 #include "sid_instr.h"
 #include "midi.h"
 #include "prefs.h"
@@ -72,6 +73,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     //TODO: need mechanism to set current polyphony (allows easy on the CPU)
     self->polyphony = polyphony;
     self->pt_debug = debug;
+    self->rtime = 0;
 
     self->buf_length = sizeof(short)*8192*self->polyphony;
     self->buf = (short *)malloc(self->buf_length);
@@ -364,8 +366,11 @@ extern "C"
 short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples)
 {
 
-    jack_time_t time_now = jack_get_time();
+    //jack_time_t time_now = jack_get_time();
+	uint32_t time_now;
     int i;
+	chips->rtime += (1000000*num_samples/chips->sample_freq);//useconds
+	time_now = chips->rtime;
     for(i=0; i<chips->polyphony; i++)
     {
         SID *sid = chips->sid_chips[i];
@@ -632,7 +637,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         }
 
         // process table
-        while((!tab->stopped) && time_now>=tab->next_tick)
+        while((!tab->stopped) && time_now>=tab->next_tick) //TODO: what happens on rollover?
         {
             table_clock(chips, instr, i, chips->pt_debug);//TODO: get pt_debug from prefs
             int speed = instr->program_speed;

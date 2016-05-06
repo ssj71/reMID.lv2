@@ -1,8 +1,9 @@
 #ifndef SID_INSTRUMENT_H
 #define SID_INSTRUMENT_H
-#include <jack/jack.h>
+//#include <jack/jack.h>
+#include <stdint.h>
 
-typedef jack_default_audio_sample_t sample_t;
+//typedef jack_default_audio_sample_t sample_t;
 
 //TODO: add detune (.1 cents ) and env3toFilter and osc3toFitler
 enum OPCODES
@@ -66,10 +67,13 @@ typedef struct sid_instrument
     int fr_vic;		// d417
     int filter_mode;	// d418-hi
 
-    jack_time_t program_speed;
+    //jack_time_t program_speed;
+    uint32_t program_speed;
 
-    sample_t vol_left;
-    sample_t vol_right;
+    //sample_t vol_left;
+    //sample_t vol_right;
+    float vol_left;
+    float vol_right;
 
     int panning;
 
@@ -84,7 +88,8 @@ typedef struct sid_instrument
 
 typedef struct sid_table_state
 {
-    jack_time_t next_tick;
+    //jack_time_t next_tick;
+	uint32_t next_tick;
 
     int pc;
     int stopped;

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <inttypes.h>
 
 //#define LV2
 #ifndef LV2
@@ -41,8 +42,8 @@ int process(uint32_t nframes, void *arg)
     read_midi(s->midi->seq,nframes, s->midi);
 
 #ifndef LV2
-    sample_t *outl = (sample_t *)jack_port_get_buffer(s->output_port_l, nframes);
-    sample_t *outr = (sample_t *)jack_port_get_buffer(s->output_port_r, nframes);
+    float *outl = (float *)jack_port_get_buffer(s->output_port_l, nframes);
+    float *outr = (float *)jack_port_get_buffer(s->output_port_r, nframes);
 #else
     float* outl = s->outl;
     float* outr = s->outr;
@@ -65,21 +66,21 @@ int process(uint32_t nframes, void *arg)
         int inst_num = s->midi->midi_programs[program];
         if(inst_num==-1) continue;
         sid_instrument_t *instr = s->sid_instr[inst_num];
-        sample_t volume = ((sample_t)s->midi->midi_keys[i]->velocity)/128.0;
+        float volume = ((float)s->midi->midi_keys[i]->velocity)/128.0;
         for(j=0; j<nframes; j++)
         {
             x = sid_buf[(i*nframes)+j];
-            sample_t a = ((sample_t)x)/32768.0;
+            float a = ((float)x)/32768.0;
 
             if(!s->sid_bank->use_sid_volume) a *= volume;
 
-            sample_t al = a*instr->vol_left;
-            sample_t ar = a*instr->vol_right;
+            float al = a*instr->vol_left;
+            float ar = a*instr->vol_right;
 
             if(instr->panning)
             {
                 // 0-127 -> 0.0-2.0
-                sample_t note = ((sample_t)s->midi->midi_keys[i]->note)/64.0;
+                float note = ((float)s->midi->midi_keys[i]->note)/64.0;
                 al *= 2.0-note;
                 ar *= note;
             }
@@ -98,7 +99,7 @@ int process(uint32_t nframes, void *arg)
 int srate(uint32_t fs, void *arg)
 {
     struct super* s = (struct super*)arg;
-    printf("The sample rate is now %" PRIu32 "/sec\n", fs);
+    printf("The sample rate is now %"PRIu32" /sec\n", fs);
     sid_set_srate(s->sid_bank, 1, fs);//1 should be pal arg
     return 0;
 }
