@@ -24,6 +24,8 @@ V1 - file selector. Thats all.
 
 V2 
 voice polyphony,
+legato,
+portamento
 
 script box
 
@@ -33,7 +35,7 @@ per voice:
   octave
   fine
  pw (12 bit)
- wave (noise, square, saw, tri, ring mod, off)
+ wave (8 bit) (noise, square, saw, tri, ring mod, off, test)
  sync (1 bit)
  filter (or bypass) (1 bit)
  A (4 bit)
@@ -41,11 +43,12 @@ per voice:
  S (4 bit)
  R (4 bit)
 voice 3 silent (1 bit)
-filter cutoff (16 bit)
+filter cutoff (11 bit)
 filter res (4 bit)
 Hp
 Lp
 Bp
+
 
 output
 osc3
