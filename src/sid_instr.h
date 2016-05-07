@@ -17,10 +17,12 @@ enum OPCODES
     V2FREQ, V2FREQPCT, V2FREQHS, V2PULSE, V2CONTROL, V2AD, V2SR,
     V3FREQ, V3FREQPCT, V3FREQHS, V3PULSE, V3CONTROL, V3AD, V3SR,
     FILTER_CUTOFF,
+	FILTER_CUTPCT,
     FR_VIC,
     FILTER_MODE,
     V1PULSEMOD, V2PULSEMOD, V3PULSEMOD,
     V1GATE, V2GATE, V3GATE,
+	V1DETUNE, V2DETUNE, V3DETUNE,
     INVALID,
     NUM_OPCODES
 };
@@ -50,18 +52,21 @@ typedef struct sid_instrument
     int v1_control;		// d404
     int v1_ad;		// d405
     int v1_sr;		// d406
+    int v1_detune;
 
     int v2_freq;		// d407, d408
     int v2_pulse;		// d409, d40a
     int v2_control;		// d40b
     int v2_ad;		// d40c
     int v2_sr;		// d40d
+    int v2_detune;
 
     int v3_freq;		// d40e, d40f
     int v3_pulse;		// d410, d411
     int v3_control;		// d412
     int v3_ad;		// d413
     int v3_sr;		// d414
+    int v3_detune;
 
     int filter_cutoff;	// d415, d416
     int fr_vic;		// d417
@@ -120,8 +125,7 @@ typedef struct sid_table_state
     int v3_pulse;
     int v3_pulsemod;
 
-    int fc_lo;
-    int fc_hi;
+    int fc;
     int fr_vic;
     int filter_mode;
     int vol;

@@ -75,8 +75,9 @@ int readn(char *str)
 sid_instrument_t** default_instrument()
 {
     sid_instrument_t** sid_instr;
-    sid_instr = malloc(sizeof(sid_instrument_t *));
+    sid_instr = calloc(2,sizeof(sid_instrument_t *));
     sid_instr[0] = malloc(sizeof(sid_instrument_t));
+    sid_instr[1] = 0;
 
     sid_instr[0]->name = malloc(sizeof(char)*8);
     strcpy(sid_instr[0]->name,"default");
@@ -96,18 +97,21 @@ sid_instrument_t** default_instrument()
     sid_instr[0]->v1_control = 0;
     sid_instr[0]->v1_ad = 0;
     sid_instr[0]->v1_sr = 0;
+    sid_instr[0]->v1_detune = 0;
 
     sid_instr[0]->v2_freq = 0;
     sid_instr[0]->v2_pulse = 0;
     sid_instr[0]->v2_control = 0;
     sid_instr[0]->v2_ad = 0;
     sid_instr[0]->v2_sr = 0;
+    sid_instr[0]->v2_detune = 0;
 
     sid_instr[0]->v3_freq = 0;
     sid_instr[0]->v3_pulse = 0;
     sid_instr[0]->v3_control = 0;
     sid_instr[0]->v3_ad = 0;
     sid_instr[0]->v3_sr = 0;
+    sid_instr[0]->v3_detune = 0;
 
     sid_instr[0]->filter_cutoff = 0;
     sid_instr[0]->fr_vic = 0;
@@ -137,10 +141,37 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         [V3PULSE]="v3_pulse",
         [V3CONTROL]="v3_control", [V3AD]="v3_ad", [V3SR]="v3_sr",
         [FILTER_CUTOFF]="filter_cutoff",
+        [FILTER_CUTPCT]="fltr_cut_pct",
         [FR_VIC]="fr_vic",
         [FILTER_MODE]="filter_mode",
         [V1PULSEMOD]="v1_pulsemod", [V2PULSEMOD]="v2_pulsemod", [V3PULSEMOD]="v3_pulsemod",
         [V1GATE]="v1_gate", [V2GATE]="v2_gate", [V3GATE]="v3_gate",
+        [V1DETUNE]="v1_detune", [V2DETUNE]="v2_detune", [V3DETUNE]="v3_detune",
+        [INVALID]=NULL
+    };
+    const char *altnames[NUM_OPCODES] =
+    {
+        [NOP]=NULL,
+		[STOP]=NULL,
+        [WAIT]=NULL,
+        [GOTO]=NULL,
+        [PRINT]=NULL,
+        [V1FREQ]=NULL, [V1FREQPCT]=NULL, [V1FREQHS]=NULL,
+        [V1PULSE]=NULL,
+        [V1CONTROL]=NULL, [V1AD]=NULL, [V1SR]=NULL,
+        [V2FREQ]=NULL, [V2FREQPCT]=NULL, [V2FREQHS]=NULL,
+        [V2PULSE]=NULL,
+        [V2CONTROL]=NULL, [V2AD]=NULL, [V2SR]=NULL,
+        [V3FREQ]=NULL, [V3FREQPCT]=NULL, [V3FREQHS]=NULL,
+        [V3PULSE]=NULL,
+        [V3CONTROL]=NULL, [V3AD]=NULL, [V3SR]=NULL,
+        [FILTER_CUTOFF]="fltr_cutoff",
+        [FILTER_CUTPCT]=NULL,
+        [FR_VIC]="fltr_res_vic",
+        [FILTER_MODE]="fltr_mode",
+        [V1PULSEMOD]=NULL, [V2PULSEMOD]=NULL, [V3PULSEMOD]=NULL,
+        [V1GATE]=NULL, [V2GATE]=NULL, [V3GATE]=NULL,
+        [V1DETUNE]=NULL, [V2DETUNE]=NULL, [V3DETUNE]=NULL,
         [INVALID]=NULL
     };
     GKeyFile *inst_config;
@@ -197,6 +228,9 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         //sid_instr[j]->sid_commands[0].opcode = STOP;
         sid_instr[j]->sid_command_list = NULL;
         sid_instr[j]->type = NORMAL;
+        sid_instr[j]->v1_detune = 0;
+        sid_instr[j]->v2_detune = 0;
+        sid_instr[j]->v3_detune = 0;
 
         // parameters from file
         err = NULL;
@@ -240,6 +274,10 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         value = g_key_file_get_value(inst_config, groups[i], "v1_sr", &err);
         if(value) sid_instr[j]->v1_sr = readn(value);
 
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "v1_detune", &err);
+        if(value) sid_instr[j]->v1_detune = readn(value);
+
         // voice 2
         err = NULL;
         value = g_key_file_get_value(inst_config, groups[i], "v2_freq", &err);
@@ -260,6 +298,10 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         err = NULL;
         value = g_key_file_get_value(inst_config, groups[i], "v2_sr", &err);
         if(value) sid_instr[j]->v2_sr = readn(value);
+
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "v2_detune", &err);
+        if(value) sid_instr[j]->v2_detune = readn(value);
 
         // voice 3
         err = NULL;
@@ -282,19 +324,32 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         value = g_key_file_get_value(inst_config, groups[i], "v3_sr", &err);
         if(value) sid_instr[j]->v3_sr = readn(value);
 
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "v3_detune", &err);
+        if(value) sid_instr[j]->v3_detune = readn(value);
+
         // fc_lo/hi
         err = NULL;
         value = g_key_file_get_value(inst_config, groups[i], "filter_cutoff", &err);
+        if(value) sid_instr[j]->filter_cutoff = readn(value);
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "fltr_cutoff", &err);
         if(value) sid_instr[j]->filter_cutoff = readn(value);
 
         // fr_vic
         err = NULL;
         value = g_key_file_get_value(inst_config, groups[i], "fr_vic", &err);
         if(value) sid_instr[j]->fr_vic = readn(value);
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "fltr_res_vic", &err);
+        if(value) sid_instr[j]->fr_vic = readn(value);
 
         // filter_mode
         err = NULL;
         value = g_key_file_get_value(inst_config, groups[i], "filter_mode", &err);
+        if(value) sid_instr[j]->filter_mode = readn(value);
+        err = NULL;
+        value = g_key_file_get_value(inst_config, groups[i], "fltr_mode", &err);
         if(value) sid_instr[j]->filter_mode = readn(value);
 
         // program speed
@@ -355,6 +410,8 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
                     }
                     if(!strncmp(opnames[l], token, oplen)
                             && (strlen(opnames[l])==oplen)) break;
+                    if(altnames[l] && !strncmp(altnames[l], token, oplen)
+                            && (strlen(altnames[l])==oplen)) break;
                 }
                 cmd->opcode = l;
                 switch(l)

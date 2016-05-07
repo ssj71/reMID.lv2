@@ -253,6 +253,33 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             chips->sid_chips[chip_num]->write(0x0e, i&0xff);
             chips->sid_chips[chip_num]->write(0x0f, i>>8);
             break;
+        case V1DETUNE:
+            d = (double)data1;
+            tab->v1_freq *= pow(2,(d/12000.0));
+            tab->v1_base_freq = tab->v1_freq;
+            i = (int)round(tab->v1_freq/chips->freq_mult);
+            if(pt_debug) printf("v1detune %d %f\n", data1, tab->v1_freq);
+            chips->sid_chips[chip_num]->write(0x00, i&0xff);
+            chips->sid_chips[chip_num]->write(0x01, i>>8);
+            break;
+        case V2DETUNE:
+            d = (double)data1;
+            tab->v2_freq *= pow(2,(d/12000.0));
+            tab->v2_base_freq = tab->v2_freq;
+            i = (int)round(tab->v2_freq/chips->freq_mult);
+            if(pt_debug) printf("v2detune %d %f\n", data1, tab->v2_freq);
+            chips->sid_chips[chip_num]->write(0x07, i&0xff);
+            chips->sid_chips[chip_num]->write(0x08, i>>8);
+            break;
+        case V3DETUNE:
+            d = (double)data1;
+            tab->v3_freq *= pow(2,(d/12000.0));
+            tab->v3_base_freq = tab->v3_freq;
+            i = (int)round(tab->v3_freq/chips->freq_mult);
+            if(pt_debug) printf("v3detune %d %f\n", data1, tab->v3_freq);
+            chips->sid_chips[chip_num]->write(0x0e, i&0xff);
+            chips->sid_chips[chip_num]->write(0x0f, i>>8);
+            break;
         case V1PULSE:
             if(pt_debug) printf("v1pulse %d\n", data1);
             chips->sid_chips[chip_num]->write(0x02, data1&0xff);
@@ -309,6 +336,14 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             break;
         case FILTER_CUTOFF:
             if(pt_debug) printf("filter_cutoff 0x%x\n", data1);
+            tab->fc = data1;
+            chips->sid_chips[chip_num]->write(0x15, data1&0x07);
+            chips->sid_chips[chip_num]->write(0x16, data1>>3);
+
+            break;
+        case FILTER_CUTPCT:
+            if(pt_debug) printf("fltr_cut_pcnt 0x%x\n", data1);
+            tab->fc *= 1+data1/100;
             chips->sid_chips[chip_num]->write(0x15, data1&0xff);
             chips->sid_chips[chip_num]->write(0x16, data1>>8);
             break;
@@ -425,61 +460,53 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             }
             else if(midi->midi_keys[i]->note_on)
             {
-                double freq = midi->note_frqs[midi->midi_keys[i]->note];
-                int freqi = (int)round(freq/chips->freq_mult);
+                double bfreq = midi->note_frqs[midi->midi_keys[i]->note];
+                double freq;
+                int freqi;
                 //int freq = note_frqs[midi_keys[i]->note];
                 //printf("%d, %d, %d\n", freq, freq&0xff, freq>>8);
 
                 if(instr->v1_freq)
                 {
-                    double v1_freq = instr->v1_freq;
-                    int v1_freqi = (int)round(v1_freq/chips->freq_mult);
-                    sid->write(0x00, v1_freqi&0xff);	// v1 freq lo
-                    sid->write(0x01, v1_freqi>>8);		// v1 freq hi
-                    tab->v1_freq = v1_freq;
-                    tab->v1_base_freq = v1_freq;
+                    freq = instr->v1_freq*pow(2,instr->v1_detune/12000.0);
                 }
                 else
                 {
-                    sid->write(0x00, freqi&0xff);	// v1 freq lo
-                    sid->write(0x01, freqi>>8);	// v1 freq hi
-                    tab->v1_freq = freq;
-                    tab->v1_base_freq = freq;
+					freq = bfreq*pow(2,instr->v1_detune/12000.0);
                 }
+				freqi = (int)round(freq/chips->freq_mult);
+				sid->write(0x00, freqi&0xff);	// v1 freq lo
+				sid->write(0x01, freqi>>8);	// v1 freq hi
+				tab->v1_freq = freq;
+				tab->v1_base_freq = freq;
 
                 if(instr->v2_freq)
                 {
-                    double v2_freq = instr->v2_freq;
-                    int v2_freqi = (int)round(v2_freq/chips->freq_mult);
-                    sid->write(0x07, v2_freqi&0xff);	// v1 freq lo
-                    sid->write(0x08, v2_freqi>>8);		// v1 freq hi
-                    tab->v2_freq = v2_freq;
-                    tab->v2_base_freq = v2_freq;
+                    freq = instr->v2_freq*pow(2,instr->v2_detune/12000.0);
                 }
                 else
                 {
-                    sid->write(0x07, freqi&0xff);	// v2 freq lo
-                    sid->write(0x08, freqi>>8);	// v2 freq hi
-                    tab->v2_freq = freq;
-                    tab->v2_base_freq = freq;
+                    freq = bfreq*pow(2,instr->v2_detune/12000.0);
                 }
+				freqi = (int)round(freq/chips->freq_mult);
+				sid->write(0x07, freqi&0xff);	// v2 freq lo
+				sid->write(0x08, freqi>>8);	// v2 freq hi
+				tab->v2_freq = freq;
+				tab->v2_base_freq = freq;
 
                 if(instr->v3_freq)
                 {
-                    double v3_freq = instr->v2_freq;
-                    int v3_freqi = (int)round(v3_freq/chips->freq_mult);
-                    sid->write(0x0e, v3_freqi&0xff);	// v1 freq lo
-                    sid->write(0x0f, v3_freqi>>8);		// v1 freq hi
-                    tab->v3_freq = v3_freq;
-                    tab->v3_base_freq = v3_freq;
+                    freq = instr->v3_freq*pow(2,instr->v3_detune/12000.0);
                 }
                 else
                 {
-                    sid->write(0x0e, freqi&0xff);	// v3 freq lo
-                    sid->write(0x0f, freqi>>8);	// v3 freq hi
-                    tab->v3_freq = freq;
-                    tab->v3_base_freq = freq;
+                    freq = bfreq*pow(2,instr->v3_detune/12000.0);
                 }
+				freqi = (int)round(freq/chips->freq_mult);
+				sid->write(0x0e, freqi&0xff);	// v3 freq lo
+				sid->write(0x0f, freqi>>8);	// v3 freq hi
+				tab->v3_freq = freq;
+				tab->v3_base_freq = freq;
 
                 sid->write(0x02, instr->v1_pulse&0xff);
                 sid->write(0x03, instr->v1_pulse>>8);
@@ -496,8 +523,8 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 sid->write(0x13, instr->v3_ad);
                 sid->write(0x14, instr->v3_sr);
 
-                sid->write(0x15, instr->filter_cutoff&0xff);
-                sid->write(0x16, instr->filter_cutoff>>8);
+                sid->write(0x15, instr->filter_cutoff&0x07);
+                sid->write(0x16, instr->filter_cutoff>>3);
                 sid->write(0x17, instr->fr_vic);
 
                 //now get rest of table ready for commands
@@ -536,6 +563,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 tab->v3_pulse = instr->v3_pulse;
                 tab->v3_pulsemod = 0;
                 tab->v3_no_midi_gate = 0;
+                tab->fc = instr->filter_cutoff;
                 tab->inst_num = inst_num;
                 tab->next_tick = time_now;
                 tab->wait_ticks = 0;

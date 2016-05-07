@@ -22,35 +22,59 @@ Note that the original design was intended to allow a sequencer to control a sin
 full documentation for the instrument programming is at http://gp2x.org/remid/inst_config.php 
 A full datasheet of the SID is pretty helpful too if you aren't familiar with it. See http://archive.6502.org/datasheets/mos_6581_sid.pdf
 
-Here are the basics for setting the registers. Usually working in hex is easier, though you can use decimal numbers if you really want.
+Here are the basics for setting the registers. Usually working in hex is easier, though you can use decimal numbers if you really want. Note that the * for voice parameters is 1-3 (e.g. v2_control).
 
-vN_control  0x80 - noise 
+v*_control  0x80 - noise 
             0x40 - pulse (square/rectangle)
             0x20 - saw
             0x10 - triangle
             0x04 - ring mod with voice(N-1) (where 1-1 == 3)
             0x02 - sync with voice(N-1) (where 1-1 == 3)
 
-vN_pulse    [0x000,0xfff]==[0,4095] pulse width when pulse waveform selected 
+v*_detune   [-100,100] voice detune in cents
+
+v*_pulse    [0x000,0xfff]==[0,4095] pulse width when pulse waveform selected 
                 in control reg. 0x800 is a square wave. 0 is DC 0, 0xfff is DC 1
 
-vN_ad       [0x00,0xff] 0xXY - X is attack, Y decay. They aren't linear, but 
+v*_ad       [0x00,0xff] 0xXY - X is attack, Y decay. They aren't linear, but 
                 larger is longer the link above has tables.
-vN_sr       [0x00,0xff] 0xXY - same idea as ad register but sustain and release
+v*_sr       [0x00,0xff] 0xXY - same idea as ad register but sustain and release
                 for each nibble
 
-filter_cutoff [0x000,0x7ff]==[0,2047] cutoff frequency which ranges linearly 
-                from about 30Hz to 12kHz
-fr_vic      [0x00,0xf7] 0xXY - X sets filter resonance, Y sets filter connections 
+fltr_cutoff [0x000,0x7ff]==[0,2047] cutoff frequency which ranges linearly 
+                from about 30Hz to 12kHz (f=N*11970/2048+30)
+fltr_res_vic [0x00,0xf7] 0xXY - X sets filter resonance, Y sets filter voice 
+                input connections 
             0xX7 - filter all 3 voices
             0xX4 - filter only voice1
             0xX2 - filter only voice2
             0xX1 - filter only voice3
             0xX0 - bypass filter
 
-filter_mode 0x4 - highpass
+fltr_mode 0x4 - highpass
             0x2 - bandpass
             0x1 - lowpass
 
 There are some other options, but those are the most common.
-For scripting I reccomend you look at some examples and/or the official docuement linked above. The files in the instruments directory has many examples to look at.
+For scripting I recommend you look at some examples. The files in the instruments directory has many examples to look at. Each line starts with a '.' and line number and then one of the following commands:
+
+__OPCODE____|___Argument____|___Description______
+nop         |   -           | no operation
+wait        |   cycles      | do nothing for N cycles
+goto        |   line        | jump to line N in script
+stop        |   -           | end script
+v*_freq     |   hertz       | set voice frequency directly in hz
+v*_freq_pct |   percent     | change voice freq by N percent
+v*_freq_hs  |   half-steps  | change voice freq by N semitones
+v*_detune   |   .1 cents    | change voice freq by N/10 cents (semitone/1000)
+v*_pulse    |   register    | set pulse width register
+v*_control  |   register    | set control register
+v*_ad       |   register    | set attack and decay register
+v*_sr       |   register    | set sustain and release
+v*_pulsemod |   reg./cycle  | add N to pulse width register each cycle
+v*_gate     |   gate state  | start (1) or stop (0) voice from sounding
+fltr_cutoff |   register    | set filter cutoff register
+fltr_cut_pct|   percent     | change filter cutoff register by N percent
+fltr_res_vic|   register    | set filter resonance and voice input connections reg.
+fltr_mode   |   register    | set filter mode (note this is shifted up into the upper nibble)
+
