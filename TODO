@@ -1,9 +1,9 @@
 V1
-fix default instrument
-add opcodes for voice detune (is freq. resolution fine enough? I think so)
-add filter_cutmod opcode //will this work since its linear freq?
+make silent chips sleep (optimization)
+add filter_cutmod opcode //use pct
 add env3tofilter opcode
 add osc3tofilter opcode
+fix default instrument
 
 V2 - single voice, no perc. mode :(
 perhaps should add N voices in GUI that allows unison, perc, or preset mode (default)

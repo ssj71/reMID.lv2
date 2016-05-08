@@ -48,6 +48,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
 			self->sid_chips[i]->set_chip_model(MOS8580);
 			self->chiptype = 8580;
         }
+        self->sid_chips[i]->enable_filter(true);
         self->sid_chips[i]->reset();
 
         // initialise SID volume to max if we're not doing volume at the SID level
@@ -343,9 +344,9 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             break;
         case FILTER_CUTPCT:
             if(pt_debug) printf("fltr_cut_pcnt 0x%x\n", data1);
-            tab->fc *= 1+data1/100;
-            chips->sid_chips[chip_num]->write(0x15, data1&0xff);
-            chips->sid_chips[chip_num]->write(0x16, data1>>8);
+            tab->fc *= 1.0+(data1/100.0);
+            chips->sid_chips[chip_num]->write(0x15, tab->fc&0x07);
+            chips->sid_chips[chip_num]->write(0x16, tab->fc>>3);
             break;
         case FR_VIC:
             if(pt_debug) printf("fr_vic 0x%x\n", data1);

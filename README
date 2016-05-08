@@ -31,13 +31,13 @@ v*_control  0x80 - noise
             0x04 - ring mod with voice(N-1) (where 1-1 == 3)
             0x02 - sync with voice(N-1) (where 1-1 == 3)
 
-v*_detune   [-100,100] voice detune in cents
+v*_detune   [-1000,1000] voice detune in cents/10
 
 v*_pulse    [0x000,0xfff]==[0,4095] pulse width when pulse waveform selected 
                 in control reg. 0x800 is a square wave. 0 is DC 0, 0xfff is DC 1
 
 v*_ad       [0x00,0xff] 0xXY - X is attack, Y decay. They aren't linear, but 
-                larger is longer the link above has tables.
+                larger is longer. The link above has tables.
 v*_sr       [0x00,0xff] 0xXY - same idea as ad register but sustain and release
                 for each nibble
 
