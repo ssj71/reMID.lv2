@@ -58,6 +58,7 @@ int process(uint32_t nframes, void *arg)
     short *sid_buf = sid_process(s->sid_bank, s->midi, s->sid_instr, (int)nframes);
     for(i=0; i<s->sid_bank->polyphony; i++)
     {
+    	//This multistep approach tells if the voice is active and which instrument it's playing
         int channel = s->midi->midi_keys[i]->channel;
         if(channel==-1) continue;
         int program = s->midi->midi_channels[channel].program;

@@ -76,7 +76,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     self->pt_debug = debug;
     self->rtime = 0;
 
-    self->buf_length = sizeof(short)*8192*self->polyphony;
+    self->buf_length = sizeof(short)*8192*self->polyphony;//TODO: we don't need this big buffer
     self->buf = (short *)malloc(self->buf_length);
     printf("%d bytes free in SID output buffer\n", self->buf_length);
 
@@ -682,6 +682,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         int j;
         while(samples_received<num_samples)
         {
+        	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
             j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
             samples_received += j;
