@@ -13,6 +13,7 @@ struct CHIPS
     int use_sid_volume;
     int pt_debug;
     int chiptype;
+    int8_t *active;
     uint32_t rtime;
 
     short *buf;

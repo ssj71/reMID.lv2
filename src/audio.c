@@ -71,6 +71,7 @@ int process(uint32_t nframes, void *arg)
         for(j=0; j<nframes; j++)
         {
             x = sid_buf[(i*nframes)+j];
+            sid_buf[(i*nframes)+j] = 0;
             float a = ((float)x)/32768.0;
 
             if(!s->sid_bank->use_sid_volume) a *= volume;

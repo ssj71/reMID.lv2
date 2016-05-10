@@ -36,6 +36,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
 
     struct CHIPS* self = (struct CHIPS*)malloc(sizeof(struct CHIPS));
     self->sid_chips = (SID**)malloc(sizeof(SID*)*(polyphony+1));
+    self->active = (int8_t*)malloc(sizeof(int8_t)*polyphony);
     for(i=0; i<polyphony; i++)
     {
         self->sid_chips[i] = new SID();
@@ -48,7 +49,8 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
 			self->sid_chips[i]->set_chip_model(MOS8580);
 			self->chiptype = 8580;
         }
-        self->sid_chips[i]->enable_filter(true);
+        self->active[i] = 0;
+//        self->sid_chips[i]->enable_filter(true);
         self->sid_chips[i]->reset();
 
         // initialise SID volume to max if we're not doing volume at the SID level
@@ -149,7 +151,7 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
 
         int opcode = cmd->opcode;
         int data1 = cmd->data1;
-        int data2 = cmd->data2;
+        //int data2 = cmd->data2;
         void *data_ptr = cmd->data_ptr;
 
         int i;
@@ -402,13 +404,14 @@ extern "C"
 short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples)
 {
 
-    //jack_time_t time_now = jack_get_time();
 	uint32_t time_now;
     int i;
 	chips->rtime += (1000000*num_samples/chips->sample_freq);//useconds
 	time_now = chips->rtime;
     for(i=0; i<chips->polyphony; i++)
     {
+    	if(!(chips->active[i] || midi->midi_keys[i]->note_on))
+    		continue;
         SID *sid = chips->sid_chips[i];
         sid_table_state_t *tab = chips->table_states[i];
         int channel = midi->midi_keys[i]->channel;
@@ -454,10 +457,12 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
 
             if(midi->midi_keys[i]->needs_clearing)
             {
+            	//this means its being voice-stolen
                 sid->write(0x04, 0x0); // release voices
                 sid->write(0x0b, 0x0);
                 sid->write(0x12, 0x0);
                 midi->midi_keys[i]->needs_clearing = 0;
+                chips->active[i] = -1;
             }
             else if(midi->midi_keys[i]->note_on)
             {
@@ -466,6 +471,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 int freqi;
                 //int freq = note_frqs[midi_keys[i]->note];
                 //printf("%d, %d, %d\n", freq, freq&0xff, freq>>8);
+                chips->active[i] = 1;
 
                 if(instr->v1_freq)
                 {
@@ -527,6 +533,8 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 sid->write(0x15, instr->filter_cutoff&0x07);
                 sid->write(0x16, instr->filter_cutoff>>3);
                 sid->write(0x17, instr->fr_vic);
+                if(instr->fr_vic)
+                	sid->enable_filter(true);
 
                 //now get rest of table ready for commands
                 if(chips->use_sid_volume)
@@ -573,6 +581,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             }
             else if(!midi->midi_channels[channel].sustain && !midi->midi_keys[i]->note_on)
             {
+            	//release the note
                 if(!tab->v1_no_midi_gate)
                 {
                     sid->write(0x04, tab->v1_control&0xfe); // voice 1 waveform, start R
@@ -588,6 +597,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                     sid->write(0x12, tab->v3_control&0xfe); // voice 3 waveform, start R
                     tab->v3_gate = 0;
                 }
+                chips->active[i] = -1;
                 midi->midi_keys[i]->note_state_changed = 0;
             }
         }
@@ -672,21 +682,26 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             int speed = instr->program_speed;
             tab->next_tick += (1000000/speed);
         }
-    }
 
-    for(i=0; i<chips->polyphony; i++)
-    {
         // clock and get output
         //printf("getting output\n");
         int samples_received = 0;
         int j;
+        short nz=0;
         while(samples_received<num_samples)
         {
         	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
             j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
+            nz &= chips->buf[i*num_samples+samples_received];
             samples_received += j;
             //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
+        }
+        if(chips->active[i]==-1 && !nz)
+        {
+        	//deactivate
+        	chips->active[i]=0;
+        	chips->sid_chips[i]->enable_filter(false);
         }
         //printf("got output\n");
     }

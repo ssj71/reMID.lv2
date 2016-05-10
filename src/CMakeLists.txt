@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 project (reMID)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g -std=c99 -DPREFIX='\"${CMAKE_INSTALL_PREFIX}\"'")
-#set(CMAKE_CPP_FLAGS "${CMAKE_CPP_FLAGS} -Wall -g -fPIC ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -g")
 
 # check for our various libraries
 find_package(PkgConfig)
@@ -22,8 +22,8 @@ pkg_check_modules(LV2 lv2)
 #message(${RESID_LIBRARIES})
 #message("here's the glibs")
 
-message(${GLIB_LIBRARIES})
-message(${JACK_LIBRARIES})
+#message(${GLIB_LIBRARIES})
+#message(${JACK_LIBRARIES})
 
 include_directories (${JACK_INCLUDE_DIRS} ${GLIB_INCLUDE_DIRS} ${LV2_INCLUDE_DIRS})
 link_directories ( ${JACK_LIBRARY_DIRS} ${GLIB_LIBRARY_DIRS} ${LV2_LIBRARY_DIRS})
