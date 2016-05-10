@@ -18,6 +18,7 @@ enum OPCODES
     V3FREQ, V3FREQPCT, V3FREQHS, V3PULSE, V3CONTROL, V3AD, V3SR,
     FILTER_CUTOFF,
 	FILTER_CUTPCT,
+	FILTER_CUTMOD,
     FR_VIC,
     FILTER_MODE,
     V1PULSEMOD, V2PULSEMOD, V3PULSEMOD,
@@ -126,6 +127,7 @@ typedef struct sid_table_state
     int v3_pulsemod;
 
     int fc;
+    float fmod;
     int fr_vic;
     int filter_mode;
     int vol;

@@ -131,6 +131,12 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
         chips->sid_chips[chip_num]->write(0x10, tab->v3_pulse&0xff);
         chips->sid_chips[chip_num]->write(0x11, tab->v3_pulse>>8);
     }
+    if(tab->fmod)
+    {
+    	tab->fc *= tab->fmod;
+		chips->sid_chips[chip_num]->write(0x15, tab->fc&0x07);
+		chips->sid_chips[chip_num]->write(0x16, tab->fc>>3);
+    }
 
     if(tab->wait_ticks)
     {
@@ -349,6 +355,10 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             tab->fc *= 1.0+(data1/100.0);
             chips->sid_chips[chip_num]->write(0x15, tab->fc&0x07);
             chips->sid_chips[chip_num]->write(0x16, tab->fc>>3);
+            break;
+        case FILTER_CUTMOD:
+            if(pt_debug) printf("fltr_cut_mod 0x%x\n", data1);
+            tab->fmod = 1.0+(data1/100.0);
             break;
         case FR_VIC:
             if(pt_debug) printf("fr_vic 0x%x\n", data1);
@@ -573,6 +583,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 tab->v3_pulsemod = 0;
                 tab->v3_no_midi_gate = 0;
                 tab->fc = instr->filter_cutoff;
+                tab->fmod = 0;
                 tab->inst_num = inst_num;
                 tab->next_tick = time_now;
                 tab->wait_ticks = 0;

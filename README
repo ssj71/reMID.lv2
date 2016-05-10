@@ -75,6 +75,7 @@ v*_pulsemod |   reg./cycle  | add N to pulse width register each cycle
 v*_gate     |   gate state  | start (1) or stop (0) voice from sounding
 fltr_cutoff |   register    | set filter cutoff register
 fltr_cut_pct|   percent     | change filter cutoff register by N percent
+fltr_cut_mod|   percent     | each cycle change filter cutoff by N percent
 fltr_res_vic|   register    | set filter resonance and voice input connections reg.
 fltr_mode   |   register    | set filter mode (note this is shifted up into the upper nibble)
 
