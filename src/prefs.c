@@ -142,7 +142,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         [V3CONTROL]="v3_control", [V3AD]="v3_ad", [V3SR]="v3_sr",
         [FILTER_CUTOFF]="filter_cutoff",
         [FILTER_CUTPCT]="fltr_cut_pct",
-        [FILTER_CUTMOD]="fltr_cut_mod",
+        [FILTER_CUTMOD]="fltr_cutmod",
         [FR_VIC]="fr_vic",
         [FILTER_MODE]="filter_mode",
         [V1PULSEMOD]="v1_pulsemod", [V2PULSEMOD]="v2_pulsemod", [V3PULSEMOD]="v3_pulsemod",

@@ -151,3 +151,10 @@
 	state:state [
 		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <sqr2saw.conf>
 	] .
+<http://github.com/ssj71/reMID.lv2/blob/master/instruments/subsynth.conf>
+	a pset:Preset ;
+	lv2:appliesTo <http://github.com/ssj71/reMID.lv2> ;
+	rdfs:label "subsynth" ;
+	state:state [
+		<http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <subsynth.conf>
+	] .

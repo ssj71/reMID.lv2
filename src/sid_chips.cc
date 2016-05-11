@@ -357,8 +357,8 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             chips->sid_chips[chip_num]->write(0x16, tab->fc>>3);
             break;
         case FILTER_CUTMOD:
-            if(pt_debug) printf("fltr_cut_mod 0x%x\n", data1);
-            tab->fmod = 1.0+(data1/100.0);
+            if(pt_debug) printf("fltr_cutmod 0x%x\n", data1);
+            tab->fmod = 1.0+(data1/1000.0);
             break;
         case FR_VIC:
             if(pt_debug) printf("fr_vic 0x%x\n", data1);
