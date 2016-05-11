@@ -157,7 +157,7 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
 
         int opcode = cmd->opcode;
         int data1 = cmd->data1;
-        //int data2 = cmd->data2;
+        int data2 = cmd->data2;
         void *data_ptr = cmd->data_ptr;
 
         int i;
@@ -178,8 +178,14 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             break;
         case GOTO:
             if(pt_debug) printf("goto %d\n", data1);
-            tab->pc = data1-1;
-            state_changed = 1;
+            if(!data2 || cmd->reg++ < data2)
+            {
+				tab->pc = data1-1;
+				state_changed = 1;
+            }
+            else
+            	//continue
+            	cmd->reg = 0;// reset so loops can nest
             break;
         case PRINT:
             printf("%s\n", (char *)data_ptr);

@@ -70,6 +70,16 @@ int readn(char *str)
     //}
     return strtol(str, (char **)NULL, 0);
 }
+void read2n(char *str, int* n1, int* n2)
+{
+	char* endp=str;
+	*n2=0;
+	*n1 = strtol(str, &endp, 0);
+	if(endp != str)
+	{
+		*n2 = strtol(endp, &endp, 0);
+	}
+}
 
 //TODO: still need to do some malloc of instruments (or probably should rather move malloc to the midi init)
 sid_instrument_t** default_instrument()
@@ -425,7 +435,9 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
                     printf("unknown command in instrument table: %s\n", token);
                     break;
                 default:
-                    cmd->data1 = readn(token+strlen(opnames[l]));
+                    //cmd->data1 = readn(token+strlen(opnames[l]));
+                    read2n(token+strlen(opnames[l]),&cmd->data1,&cmd->data2);
+                    cmd->reg = 0;
                     break;
                 }
             }

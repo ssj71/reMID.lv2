@@ -59,23 +59,23 @@ There are some other options, but those are the most common.
 For scripting I recommend you look at some examples. The files in the instruments directory has many examples to look at. Each line starts with a '.' and line number and then one of the following commands:
 
 __OPCODE____|___Argument____|___Description______
-nop         |   -           | no operation
-wait        |   cycles      | do nothing for N cycles
-goto        |   line        | jump to line N in script
-stop        |   -           | end script
-v*_freq     |   hertz       | set voice frequency directly in hz
-v*_freq_pct |   percent     | change voice freq by N percent
-v*_freq_hs  |   half-steps  | change voice freq by N semitones
-v*_detune   |   .1 cents    | change voice freq by N/10 cents (semitone/1000)
-v*_pulse    |   register    | set pulse width register
-v*_control  |   register    | set control register
-v*_ad       |   register    | set attack and decay register
-v*_sr       |   register    | set sustain and release
-v*_pulsemod |   reg./cycle  | add N to pulse width register each cycle
-v*_gate     |   gate state  | start (1) or stop (0) voice from sounding
-fltr_cutoff |   register    | set filter cutoff register
-fltr_cut_pct|   percent     | change filter cutoff register by N percent
+nop         |  -            | no operation
+wait        |  cycles       | do nothing for N cycles
+goto        |  line, jumps  | jump to line N in script, if 2nd arg provided, it will only jump M times
+stop        |  -            | end script
+v*_freq     |  hertz        | set voice frequency directly in hz
+v*_freq_pct |  percent      | change voice freq by N percent
+v*_freq_hs  |  half-steps   | change voice freq by N semitones
+v*_detune   |  .1 cents     | change voice freq by N/10 cents (semitone/1000)
+v*_pulse    |  register     | set pulse width register
+v*_control  |  register     | set control register
+v*_ad       |  register     | set attack and decay register
+v*_sr       |  register     | set sustain and release
+v*_pulsemod |  reg./cycle   | add N to pulse width register each cycle
+v*_gate     |  gate state   | start (1) or stop (0) voice from sounding
+fltr_cutoff |  register     | set filter cutoff register
+fltr_cut_pct|  percent      | change filter cutoff register by N percent
 fltr_cutmod |  .1 percent   | each cycle change filter cutoff by N/10 percent
-fltr_res_vic|   register    | set filter resonance and voice input connections reg.
-fltr_mode   |   register    | set filter mode (note this is shifted up into the upper nibble)
+fltr_res_vic|  register     | set filter resonance and voice input connections reg.
+fltr_mode   |  register     | set filter mode (note this is shifted up into the upper nibble)
 

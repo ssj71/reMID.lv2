@@ -33,6 +33,7 @@ typedef struct sid_command
     int line_number;
     enum OPCODES opcode;
     int data1, data2;
+    int reg;
     void *data_ptr;
     struct sid_command *next;
 } sid_command_t;
