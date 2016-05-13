@@ -112,6 +112,7 @@ void sid_set_srate(struct CHIPS *chips, int pal, double srate)
 void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int pt_debug)
 {
     sid_table_state_t *tab = chips->table_states[chip_num];
+    int tmp;
 
     // pulse mods
     if(tab->v1_pulsemod)
@@ -137,6 +138,18 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
     	tab->fc *= tab->fmod;
 		chips->sid_chips[chip_num]->write(0x15, tab->fc&0x07);
 		chips->sid_chips[chip_num]->write(0x16, tab->fc>>3);
+    }
+    else if(tab->osc32filter)
+    {
+    	tmp = tab->fc*(((long)tab->osc32filter*chips->sid_chips[chip_num]->read(0x1b))*.0139216);//this coefficient normalizes the inputs
+		chips->sid_chips[chip_num]->write(0x15, tmp&0x07);
+		chips->sid_chips[chip_num]->write(0x16, tmp>>3);
+    }
+    else if(tab->env32filter)
+    {
+    	tmp = tab->fc*(((long)tab->env32filter*chips->sid_chips[chip_num]->read(0x1c))*0.0139216);//this coefficient normalizes the inputs
+		chips->sid_chips[chip_num]->write(0x15, tmp&0x07);
+		chips->sid_chips[chip_num]->write(0x16, tmp>>3);
     }
 
     if(tab->wait_ticks)
@@ -404,6 +417,14 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             tab->v3_no_midi_gate = 1;
             tab->v3_gate = data1;
             chips->sid_chips[chip_num]->write(0x12, (tab->v3_control&0xfe)|tab->v1_gate);
+            break;
+        case OSC32FILTER:
+            if(pt_debug) printf("osc3_3fltr 0x%x\n", data1);
+            tab->osc32filter = data1;
+            break;
+        case ENV32FILTER:
+            if(pt_debug) printf("env3_3fltr 0x%x\n", data1);
+            tab->env32filter = data1;
             break;
         }
         cmd = cmd->next;

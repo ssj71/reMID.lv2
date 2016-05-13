@@ -1,9 +1,16 @@
 V1
-make silent chips sleep (optimization)
-add filter_cutmod opcode //use pct
 add env3tofilter opcode
 add osc3tofilter opcode
 fix default instrument
+add string state
+learn AVTK/Pugl
+make gui
+add deflemask conversion script
+
+originally a V2 was planned but I'm less and less keen on it. Instead I think I'll expose parameters as patchables for automation or tweaking
+when tweaks occur they edit the instruments. We'll have to have a state saving thing for this I think
+params > string > file ?
+
 
 V2 - single voice, no perc. mode :(
 perhaps should add N voices in GUI that allows unison, perc, or preset mode (default)
@@ -13,7 +20,6 @@ change architecture so there is a "current" instrument
 make polyphony selectable
 new GUI
 add circular buffer to change instrument collection
-learn AVTK/Pugl
 refactor parser to avoid GTK (probably will scrap parser)
 python utiil  to convert banks to lv2 states
 

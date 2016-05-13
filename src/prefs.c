@@ -158,6 +158,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         [V1PULSEMOD]="v1_pulsemod", [V2PULSEMOD]="v2_pulsemod", [V3PULSEMOD]="v3_pulsemod",
         [V1GATE]="v1_gate", [V2GATE]="v2_gate", [V3GATE]="v3_gate",
         [V1DETUNE]="v1_detune", [V2DETUNE]="v2_detune", [V3DETUNE]="v3_detune",
+		[ENV32FILTER]="env3_2fltr", [OSC32FILTER]="osc3_2fltr",
         [INVALID]=NULL
     };
     const char *altnames[NUM_OPCODES] =
@@ -184,6 +185,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         [V1PULSEMOD]=NULL, [V2PULSEMOD]=NULL, [V3PULSEMOD]=NULL,
         [V1GATE]=NULL, [V2GATE]=NULL, [V3GATE]=NULL,
         [V1DETUNE]=NULL, [V2DETUNE]=NULL, [V3DETUNE]=NULL,
+		[ENV32FILTER]=NULL, [OSC32FILTER]=NULL,
         [INVALID]=NULL
     };
     GKeyFile *inst_config;
@@ -436,7 +438,6 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
                     printf("unknown command in instrument table: %s\n", token);
                     break;
                 default:
-                    //cmd->data1 = readn(token+strlen(opnames[l]));
                     read2n(token+strlen(opnames[l]),&cmd->data1,&cmd->data2);
                     if(cmd->data2)
                     	cmd->reg = (loopcounter++)&(MAXNLOOPS-1);//index of next loop counter

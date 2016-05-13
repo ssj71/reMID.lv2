@@ -25,6 +25,8 @@ enum OPCODES
     V1PULSEMOD, V2PULSEMOD, V3PULSEMOD,
     V1GATE, V2GATE, V3GATE,
 	V1DETUNE, V2DETUNE, V3DETUNE,
+	ENV32FILTER,
+	OSC32FILTER,
     INVALID,
     NUM_OPCODES
 };
@@ -133,6 +135,8 @@ typedef struct sid_table_state
     float fmod;
     int fr_vic;
     int filter_mode;
+    int env32filter;
+    int osc32filter;
     int vol;
 
     int pitchbend;
