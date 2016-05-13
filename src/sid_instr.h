@@ -3,9 +3,10 @@
 //#include <jack/jack.h>
 #include <stdint.h>
 
-//typedef jack_default_audio_sample_t sample_t;
+//keep max 2^N
+#define MAXNLOOPS 16
 
-//TODO: add detune (.1 cents ) and env3toFilter and osc3toFitler
+//TODO: add env3toFilter and osc3toFitler
 enum OPCODES
 {
     NOP=0,
@@ -99,6 +100,7 @@ typedef struct sid_table_state
 	uint32_t next_tick;
 
     int pc;
+    int counter[MAXNLOOPS];//we only allow 8 loops though they can be nested
     int stopped;
     int wait_ticks;
     int inst_num;

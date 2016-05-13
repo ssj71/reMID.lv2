@@ -67,6 +67,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     {
         self->table_states[i] = (sid_table_state_t *)calloc(1, sizeof(sid_table_state_t));
         self->table_states[i]->stopped = 1;
+        //everything else initialized at note-on
     }
     self->table_states[i] = NULL;
 
@@ -178,14 +179,14 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
             break;
         case GOTO:
             if(pt_debug) printf("goto %d\n", data1);
-            if(!data2 || cmd->reg++ < data2)
+            if(!data2 || tab->counter[cmd->reg]++ < data2)
             {
 				tab->pc = data1-1;
 				state_changed = 1;
             }
             else
             	//continue
-            	cmd->reg = 0;// reset so loops can nest
+            	tab->counter[cmd->reg] = 0;// reset so loops can nest
             break;
         case PRINT:
             printf("%s\n", (char *)data_ptr);
@@ -595,6 +596,8 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 tab->wait_ticks = 0;
                 tab->stopped = 0;
                 tab->pc = 0;
+				for(int j=0;j<MAXNLOOPS;j++)
+					tab->counter[j] = 0;
             }
             else if(!midi->midi_channels[channel].sustain && !midi->midi_keys[i]->note_on)
             {

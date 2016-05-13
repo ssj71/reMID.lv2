@@ -388,6 +388,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         int k;
         sid_command_t **cmd_ptr = &(sid_instr[j]->sid_command_list);
         sid_command_t *cmd;
+        int loopcounter = 0;
         for(k = 0; keys[k]; k++)
         {
             if(strncmp(keys[k], ".", 1)) continue;
@@ -437,7 +438,8 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
                 default:
                     //cmd->data1 = readn(token+strlen(opnames[l]));
                     read2n(token+strlen(opnames[l]),&cmd->data1,&cmd->data2);
-                    cmd->reg = 0;
+                    if(cmd->data2)
+                    	cmd->reg = (loopcounter++)&(MAXNLOOPS-1);//index of next loop counter
                     break;
                 }
             }

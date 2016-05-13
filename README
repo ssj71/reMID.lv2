@@ -46,12 +46,12 @@ fltr_cutoff [0x000,0x7ff]==[0,2047] cutoff frequency which ranges linearly
 fltr_res_vic [0x00,0xf7] 0xXY - X sets filter resonance, Y sets filter voice 
                 input connections 
             0xX7 - filter all 3 voices
-            0xX4 - filter only voice1
+            0xX4 - filter only voice3
             0xX2 - filter only voice2
-            0xX1 - filter only voice3
+            0xX1 - filter only voice1
             0xX0 - bypass filter
 
-fltr_mode 0x4 - highpass
+fltr_mode   0x4 - highpass
             0x2 - bandpass
             0x1 - lowpass
 
