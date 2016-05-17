@@ -245,6 +245,9 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         sid_instr[j]->v1_detune = 0;
         sid_instr[j]->v2_detune = 0;
         sid_instr[j]->v3_detune = 0;
+        sid_instr[j]->v1_pulse = 0x800;
+        sid_instr[j]->v2_pulse = 0x800;
+        sid_instr[j]->v3_pulse = 0x800;
 
         // parameters from file
         err = NULL;

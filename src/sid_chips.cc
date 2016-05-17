@@ -141,13 +141,13 @@ void table_clock(struct CHIPS *chips, sid_instrument_t *instr, int chip_num, int
     }
     else if(tab->osc32filter)
     {
-    	tmp = tab->fc*(((long)tab->osc32filter*chips->sid_chips[chip_num]->read(0x1b))*.0139216);//this coefficient normalizes the inputs
+    	tmp = tab->fc + ((long)tab->fc*tab->osc32filter*chips->sid_chips[chip_num]->read(0x1b))*.000039216;//this coefficient normalizes the inputs
 		chips->sid_chips[chip_num]->write(0x15, tmp&0x07);
 		chips->sid_chips[chip_num]->write(0x16, tmp>>3);
     }
     else if(tab->env32filter)
     {
-    	tmp = tab->fc*(((long)tab->env32filter*chips->sid_chips[chip_num]->read(0x1c))*0.0139216);//this coefficient normalizes the inputs
+    	tmp = tab->fc + ((long)tab->fc*tab->env32filter*chips->sid_chips[chip_num]->read(0x1c))*0.000039216;//this coefficient normalizes the inputs
 		chips->sid_chips[chip_num]->write(0x15, tmp&0x07);
 		chips->sid_chips[chip_num]->write(0x16, tmp>>3);
     }
@@ -611,6 +611,8 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
                 tab->v3_pulsemod = 0;
                 tab->v3_no_midi_gate = 0;
                 tab->fc = instr->filter_cutoff;
+                tab->env32filter = 0;
+                tab->osc32filter = 0;
                 tab->fmod = 0;
                 tab->inst_num = inst_num;
                 tab->next_tick = time_now;
@@ -734,7 +736,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
             j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
-            nz &= chips->buf[i*num_samples+samples_received];
+            nz |= chips->buf[i*num_samples+samples_received];
             samples_received += j;
             //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
         }
