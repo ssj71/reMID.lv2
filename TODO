@@ -1,10 +1,8 @@
 V1
-add env3tofilter opcode
-add osc3tofilter opcode
-fix default instrument
 add string state
 learn AVTK/Pugl
 make gui
+fix default instrument
 add deflemask conversion script
 
 originally a V2 was planned but I'm less and less keen on it. Instead I think I'll expose parameters as patchables for automation or tweaking
