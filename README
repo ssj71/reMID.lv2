@@ -78,7 +78,7 @@ fltr_cut_pct|  percent      | change filter cutoff register by N percent
 fltr_cutmod |  .1 percent   | each cycle change filter cutoff by N/10 percent
 fltr_res_vic|  register     | set filter resonance and voice input connections reg.
 fltr_mode   |  register     | set filter mode (note this is shifted up into the upper nibble)
-env3_2fltr  |  -            | modulate filter cutoff with output of v3's envelope, call this once and it starts modulation
-            |               |   to stop modulation call fltr_cutmod 0
+env3_2fltr  |  percent      | modulate filter cutoff with output of v3's envelope, call this once and it starts modulation
+            |               |   the argument determines the scale of modulation, so 100 will double the cutoff at the peak
 osc3_2fltr  |  -            | modulate filter cutoff with output of v3's oscillator (use for LFO)
 
