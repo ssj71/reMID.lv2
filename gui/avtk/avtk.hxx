@@ -38,6 +38,9 @@
 // the UI header, defines lots of interaction functionality
 #include "ui.hxx"
 #include "utils.hxx"
+#ifdef AVTK_SNDFILE
+#include "snd_utils.hxx"
+#endif
 
 // the Theme class definition
 #include "theme.hxx"

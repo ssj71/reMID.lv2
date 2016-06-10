@@ -29,46 +29,46 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef OPENAV_AVTK_UTILS_HXX
-#define OPENAV_AVTK_UTILS_HXX
+#include "utils.hxx"
 
-/** Utils
- * Utils provides a variety of utility functions that are cross-platform.
- * They're based on small libraries like tinydir and zix, and aim to serve
- * creating fully features UI's in a lightweight and cross platform way.
-**/
-
-#include <vector>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <iostream>
-#include <stdlib.h>
-#include <libgen.h>
-#include <sys/stat.h>
-
-#include "tinydir.hxx"
+#include "avtk.hxx"
+#include "theme.hxx"
+#include <algorithm>
+#include <cstring>
+#include <sndfile.h>
 
 namespace Avtk
 {
-int fileUpLevel( std::string path, std::string& newPath );
+int loadSample( std::string path, std::vector< float >& sample, bool printErrors )
+{
+#ifdef AVTK_SNDFILE
+	SF_INFO info;
+	memset( &info, 0, sizeof( SF_INFO ) );
+	SNDFILE* const sndfile = sf_open( path.c_str(), SFM_READ, &info);
+	if ( !sndfile ) {
+		printf("Failed to open sample '%s'\n", path.c_str() );
+		return -1;
+	}
 
-int directories( std::string d, std::vector< std::string >& files, bool nameOnly = true, bool printErrors = true );
+	if( !(info.channels == 1 || info.channels == 2) ) {
+		int chnls = info.channels;
+		printf("Loading sample %s, channels = %i\n", path.c_str(), chnls );
+		return -1;
+	}
 
-/** lists the contents of a directory @param directory, and stores the
- * resuliting filenames in the provided @param output vector. The options are
- * provided to allow for better presentation of the contents:<br/>
- * - @param nameOnly (provides only file *name* without path).<br/>
- * - @param smartShortStrings (remove starting N characters if common in all files).<br/>
- * - @param printErrors (prints errors if file doesn't exist etc).
- */
-int directoryContents(  std::string directory,
-                        std::vector< std::string >& output,
-                        std::string& strippedFilenameStart,
-                        bool nameOnly = true,
-                        bool smartShortStrings = true,
-                        bool printErrors = true );
-};
+	sample.resize( info.frames * info.channels );
 
-#endif // OPENAV_AVTK_UTILS_HXX
+	sf_seek(sndfile, 0ul, SEEK_SET);
+	sf_read_float( sndfile, &sample[0], info.frames * info.channels );
+	sf_close(sndfile);
 
+	return OPENAV_OK;
+#else
+	if( printErrors ) {
+		printf("AVTK compiled without SNDFILE support: cannot load audio sample.\n");
+	}
+	return OPENAV_ERROR;
+#endif
+}
+
+} //  Avtk namespace
