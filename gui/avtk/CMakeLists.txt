@@ -77,7 +77,7 @@ add_library(avtk STATIC
     text.cxx
     theme.cxx
     ui.cxx
-    utils.cxx ##this file has deps on libsndfile, that could be factored out though
+    utils.cxx
     ${AVTK_SND_SRC}
     waveform.cxx
     widget.cxx
