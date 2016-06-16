@@ -193,6 +193,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
     char *value;
     GError *err;
     sid_instrument_t** sid_instr;
+    float formatversion;
 
     inst_config = g_key_file_new();
     printf("loading %s\n",path);
@@ -215,6 +216,20 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
         if(!strcmp(groups[i], "programs")) continue;
         num_instrs++;
     }
+    //grab the format version just in case (currently unused)
+    err = NULL;
+    gchar **programs = g_key_file_get_keys(inst_config, "programs", NULL, &err);
+    if(programs)
+    {
+		err = NULL;
+		value = g_key_file_get_value(inst_config, "programs", "format", &err);
+		if(value)
+		{
+			formatversion = strtod(value, NULL);
+			printf("Configuration file format: %f\n", formatversion);
+		}
+    }
+
     if(num_instrs) sid_instr = malloc(sizeof(sid_instrument_t *)*(num_instrs+1));
     else
     {
@@ -455,7 +470,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
 
     // programs
     err = NULL;
-    gchar **programs = g_key_file_get_keys(inst_config, "programs", NULL, &err);
+    programs = g_key_file_get_keys(inst_config, "programs", NULL, &err);
     if(programs)
     {
         for(i=0; i<128; i++)
