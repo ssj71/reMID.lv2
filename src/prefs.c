@@ -416,6 +416,7 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
             err = NULL;
             value = g_key_file_get_value(inst_config, groups[i], keys[k], &err);
             if(!value) continue;
+            //printf("value is %s\n", value);
 
             const char *delims = ",";
             char *line = strdup(value);
@@ -433,14 +434,17 @@ sid_instrument_t** read_instruments(char *path, midi_arrays_t *midi)
                 cmd->line_number = line_no;
 
                 while(isspace(*token)) token++;
+                if(!strlen(token))continue;
                 int l;
+                int oplen;
+                for(oplen=0; token[oplen]; oplen++)
+                {
+                    if(isspace(token[oplen])) break;
+                }
+                if(!oplen || token[0] == ',')continue;
+                //printf("token is %s, oplen %i\n",token,oplen);
                 for(l=0; opnames[l]; l++)
                 {
-                    int oplen;
-                    for(oplen=0; token[oplen]; oplen++)
-                    {
-                        if(isspace(token[oplen])) break;
-                    }
                     if(!strncmp(opnames[l], token, oplen)
                             && (strlen(opnames[l])==oplen)) break;
                     if(altnames[l] && !strncmp(altnames[l], token, oplen)
