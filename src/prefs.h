@@ -26,6 +26,7 @@
 //extern int use_sid_volume;
 
 //extern int num_instrs;
+char *strdup (const char *s);
 
 void prefs_set_polyphony(int value);
 

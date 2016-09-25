@@ -22,7 +22,7 @@ void add_connect(char** connect_args, char *port)
 {
     int i;
     for(i=0; connect_args[i]; i++);
-    strcpy(connect_args[i++], port);
+    connect_args[i++] = strdup(port);
     connect_args[i] = NULL;
 }
 

@@ -135,6 +135,7 @@ void jack_connect_ports(jack_client_t *client, char port_names[][16], char** jac
         {
             printf("Connected to JACK port %s\n", port);
         }
+        free(jack_connect_args[i]);
     }
 }
 

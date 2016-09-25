@@ -166,6 +166,7 @@ midi_arrays_t* init_midi(void* o, int polyphony, char** midi_connect_args)
         //printf("Connecting JACK MIDI input to %d:%d\n", client, port);
         jack_midi_connect(client, midi_connect_args[i]);
 #endif
+        free(midi_connect_args[i]);
     }
 
     /*for reinit
