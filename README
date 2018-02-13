@@ -5,6 +5,8 @@ Dependencies:
 libglib-2.0
 libjack-dev (standalone version)
 liblv2-dev (plugin version)
+alsa-dev
+pkg-config
 
 Once the dependencies are fulfilled return to this folder and run:
    mkdir build
