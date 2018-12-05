@@ -24,16 +24,19 @@
     rdfs:label "intrument file" ;
     rdfs:range atom:Path ;
     .
-<polyphony>
+<http://github.com/ssj71/reMID.lv2/polyphony>
     a lv2:Parameter ;
+	rdfs:label "polyphony" ;
     rdfs:range atom:Int ;
     .
-<chip_type>
+<http://github.com/ssj71/reMID.lv2/chip_type>
     a lv2:Parameter ;
+	rdfs:label "chip type" ;
     rdfs:range atom:Int ;
     .
-<use_sid_volume>
+<http://github.com/ssj71/reMID.lv2/use_sid_volume>
     a lv2:Parameter ;
+	rdfs:label "use volume of chip" ;
     rdfs:range atom:Bool ;
     .
 
@@ -90,9 +93,9 @@
         ] ;
         state:state [
             <http://github.com/ssj71/reMID.lv2/blob/master/instruments/instruments.conf> <instruments.conf> ;
-            <polyphony> 32 ; # max 128
-            <chip_type> 8580 ; # other option is 6581, it has a few more idiosyncacies
-            <use_sid_volume> 0 ; # this selects whether to use the chip's volume for velocity or use a higher resolution external volume control
+            <http://github.com/ssj71/reMID.lv2/polyphony> 32 ; # max 128
+            <http://github.com/ssj71/reMID.lv2/chip_type> 8580 ; # other option is 6581, it has a few more idiosyncacies
+            <http://github.com/ssj71/reMID.lv2/use_sid_volume> false ; # this selects whether to use the chip's volume for velocity or use a higher resolution external volume control
         ].
 
 <http://github.com/ssj71/reMID.lv2/blob/master/instruments/bass_big0c.conf>
