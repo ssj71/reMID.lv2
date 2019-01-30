@@ -19,6 +19,10 @@ struct CHIPS
     short *buf;
     int buf_length;
 
+    int32_t *prevx; //dc blocking filter
+    int32_t *prevy;
+    int32_t *err;
+
     double clock_freq;
     double freq_mult;
     double sample_freq;

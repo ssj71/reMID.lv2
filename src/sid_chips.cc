@@ -37,6 +37,9 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     struct CHIPS* self = (struct CHIPS*)malloc(sizeof(struct CHIPS));
     self->sid_chips = (SID**)malloc(sizeof(SID*)*(polyphony+1));
     self->active = (int8_t*)malloc(sizeof(int8_t)*polyphony);
+    self->prevx = (int32_t*)malloc(sizeof(int32_t)*polyphony);
+    self->prevy = (int32_t*)malloc(sizeof(int32_t)*polyphony);
+    self->err = (int32_t*)malloc(sizeof(int32_t)*polyphony);
     for(i=0; i<polyphony; i++)
     {
         self->sid_chips[i] = new SID();
@@ -54,11 +57,13 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
         self->sid_chips[i]->reset();
 
         // initialise SID volume to max if we're not doing volume at the SID level
-        if(!use_sid_volume) self->sid_chips[i]->write(0x18, 0x0f);
-        self->use_sid_volume = use_sid_volume;
+        if(!use_sid_volume) self->sid_chips[i]->write(0x18, 0x0f); self->use_sid_volume = use_sid_volume;
 
         //sid_chips[i]->write(0x04, 0x1);
         //midi_keys[i]->needs_clearing = 1;
+
+        //init DC blocking filter
+        self->prevx = self->prevy = self->err = 0;
     }
     self->sid_chips[i] = NULL;//safety net in case extra index is checked
 
@@ -736,6 +741,14 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
             j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
+            //dc block
+            chips->err[i] -= chips->prevx[i];
+            chips->prevx[i] = (chips->buf[i*num_samples+samples_received])<<15;
+            chips->err[i] += chips->prevx[i];
+            chips->err[i] -= 3.2768*chips->prevy[i]; //(1-.9999)<<15
+            chips->prevy[i] = chips->err[i]>>15;
+            chips->buf[i*num_samples+samples_received] = (short)chips->prevy[i];
+            //check for note end
             nz |= chips->buf[i*num_samples+samples_received];
             samples_received += j;
             //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
@@ -745,6 +758,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         	//deactivate
         	chips->active[i]=0;
         	chips->sid_chips[i]->enable_filter(false);
+            chips->prevx[i] = chips->prevy[i] = chips->err[i] = 0;
         }
         //printf("got output\n");
     }
