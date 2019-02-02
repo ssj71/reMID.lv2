@@ -64,7 +64,7 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
         //midi_keys[i]->needs_clearing = 1;
 
         //init DC blocking filter
-        self->prevx = self->prevy = self->err = 0;
+        self->prevx[i] = self->prevy[i] = self->err[i] = 0;
     }
     self->sid_chips[i] = NULL;//safety net in case extra index is checked
 
@@ -754,7 +754,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             samples_received += j;
             //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
         }
-        if(chips->active[i]==-1 && !nz)
+        if(chips->active[i]==-1 && (nz < 50 && nz > -50))
         {
             //deactivate
             chips->active[i]=0;
