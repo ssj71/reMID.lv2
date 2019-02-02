@@ -57,7 +57,8 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
         self->sid_chips[i]->reset();
 
         // initialise SID volume to max if we're not doing volume at the SID level
-        if(!use_sid_volume) self->sid_chips[i]->write(0x18, 0x0f); self->use_sid_volume = use_sid_volume;
+        if(!use_sid_volume) self->sid_chips[i]->write(0x18, 0x0f);
+        self->use_sid_volume = use_sid_volume;
 
         //sid_chips[i]->write(0x04, 0x1);
         //midi_keys[i]->needs_clearing = 1;
@@ -755,9 +756,9 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         }
         if(chips->active[i]==-1 && !nz)
         {
-        	//deactivate
-        	chips->active[i]=0;
-        	chips->sid_chips[i]->enable_filter(false);
+            //deactivate
+            chips->active[i]=0;
+            chips->sid_chips[i]->enable_filter(false);
             chips->prevx[i] = chips->prevy[i] = chips->err[i] = 0;
         }
         //printf("got output\n");
