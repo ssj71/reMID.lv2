@@ -760,6 +760,7 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             chips->active[i]=0;
             chips->sid_chips[i]->enable_filter(false);
             chips->prevx[i] = chips->prevy[i] = chips->err[i] = 0;
+            midi->midi_keys[i]->channel = -1;
         }
         //printf("got output\n");
     }
