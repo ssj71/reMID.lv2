@@ -736,25 +736,27 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         //printf("getting output\n");
         int samples_received = 0;
         int j;
-        short nz=0;
+        unsigned short nz=0;
         while(samples_received<num_samples)
         {
         	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
             j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
+            //TODO: what if there are more than one sample in this clock?
+
             //dc block
             chips->err[i] -= chips->prevx[i];
             chips->prevx[i] = (chips->buf[i*num_samples+samples_received])<<15;
             chips->err[i] += chips->prevx[i];
-            chips->err[i] -= 3.2768*chips->prevy[i]; //(1-.9999)<<15
+            chips->err[i] -= 32.768*chips->prevy[i]; //(1-.999)<<15
             chips->prevy[i] = chips->err[i]>>15;
             chips->buf[i*num_samples+samples_received] = (short)chips->prevy[i];
             //check for note end
-            nz |= chips->buf[i*num_samples+samples_received];
+            nz += abs(chips->buf[i*num_samples+samples_received]);
             samples_received += j;
             //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
         }
-        if(chips->active[i]==-1 && (nz < 50 && nz > -50))
+        if(chips->active[i]==-1 && nz < 20 )
         {
             //deactivate
             chips->active[i]=0;
