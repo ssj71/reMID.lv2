@@ -777,7 +777,7 @@ void sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** si
             chips->prevy[i] = chips->err[i]>>15;
             chips->buf[j] = (short)chips->prevy[i];
             //check for note end
-            nz += abs(chips->buf[j]);
+            nz |= chips->buf[j];
 
             //mix to stereo
             a = ((float)chips->buf[j])/32768.0;
@@ -786,7 +786,7 @@ void sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** si
             outl[j] += gainl*a;
             outr[j] += gainr*a;
         }
-        if(chips->active[i]==-1 && nz < 20 )
+        if(chips->active[i]==-1 && !nz )
         {
             //deactivate
             chips->active[i]=0;
