@@ -79,6 +79,11 @@ void note_on(midi_arrays_t* midi, int channel, int note, int velocity)
     if(program==-1) return;
     int inst_num = midi->midi_programs[program];
     if(inst_num==-1) return;
+    if(!velocity)
+    {
+        note_off(midi, channel, note);
+        return;
+    }
 
     find_next_voice(midi->midi_keys, midi->free_voices, &midi->next_voice, &midi->voice_use_index);
     midi->midi_keys[midi->next_voice]->note_state_changed = 1;
