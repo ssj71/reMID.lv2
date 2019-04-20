@@ -85,8 +85,10 @@ struct CHIPS* sid_init(int polyphony, int use_sid_volume, int chiptype, int debu
     self->pt_debug = debug;
     self->rtime = 0;
 
-    self->buf_length = sizeof(short)*8192*self->polyphony;//TODO: we don't need this big buffer
+    self->buf_length = sizeof(short)*8192;//buffer big enough for largest known blocksize
     self->buf = (short *)malloc(self->buf_length);
+    for(i=0;i<8192;i++)
+        self->buf[i] = 0;
     printf("%d bytes free in SID output buffer\n", self->buf_length);
 
     return self;
@@ -445,13 +447,18 @@ void clear_key(midi_key_state** midi_keys, int key)
 }
 
 extern "C"
-short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples)
+void sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** sid_instr, int num_samples, float* outl, float* outr)
 {
 
 	uint32_t time_now;
     int i;
 	chips->rtime += (1000000*num_samples/chips->sample_freq);//useconds
 	time_now = chips->rtime;
+    for(i=0; i<num_samples; i++)
+    {
+        outr[i] = 0.0;
+		outl[i] = 0.0;
+    }
     for(i=0; i<chips->polyphony; i++)
     {
     	if(!(chips->active[i] || midi->midi_keys[i]->note_on))
@@ -737,24 +744,47 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
         int samples_received = 0;
         int j;
         unsigned short nz=0;
+        float a;
+        float gainl = instr->vol_left;
+        float gainr = instr->vol_right;
+        if(!chips->use_sid_volume)
+        {
+            a = (float)midi->midi_keys[i]->velocity;
+            gainl *= a/128.0;
+            gainr *= a/128.0;
+        }
+        if(instr->panning)
+        {
+            // 0-127 -> 0.0-2.0
+            float note = ((float)midi->midi_keys[i]->note)/64.0;
+            gainl *= 2.0-note;
+            gainr *= note;
+        }
         while(samples_received<num_samples)
         {
-        	//TODO: mix the outputs here, check if zero to kill inactive voices
             cycle_count cycles = (cycle_count)chips->clocks_per_sample*(cycle_count)(num_samples-samples_received);
-            j = chips->sid_chips[i]->clock(cycles, chips->buf+(i*num_samples)+samples_received, num_samples-samples_received);
-            //TODO: what if there are more than one sample in this clock?
-
+            samples_received += chips->sid_chips[i]->clock(cycles, chips->buf+samples_received, num_samples-samples_received);
+            //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
+        }
+        //final processing to output
+        for(j=0;j<samples_received;j++)
+        {
             //dc block
             chips->err[i] -= chips->prevx[i];
-            chips->prevx[i] = (chips->buf[i*num_samples+samples_received])<<15;
+            chips->prevx[i] = (chips->buf[j])<<15;
             chips->err[i] += chips->prevx[i];
             chips->err[i] -= 32.768*chips->prevy[i]; //(1-.999)<<15
             chips->prevy[i] = chips->err[i]>>15;
-            chips->buf[i*num_samples+samples_received] = (short)chips->prevy[i];
+            chips->buf[j] = (short)chips->prevy[i];
             //check for note end
-            nz += abs(chips->buf[i*num_samples+samples_received]);
-            samples_received += j;
-            //printf("samples_received: %d / num_samples: %d\n", samples_received, num_samples);
+            nz += abs(chips->buf[j]);
+
+            //mix to stereo
+            a = ((float)chips->buf[j])/32768.0;
+            chips->buf[j] = 0; //clear for next chip
+
+            outl[j] += gainl*a;
+            outr[j] += gainr*a;
         }
         if(chips->active[i]==-1 && nz < 20 )
         {
@@ -765,8 +795,6 @@ short *sid_process(struct CHIPS *chips, midi_arrays_t* midi, sid_instrument_t** 
             midi->midi_keys[i]->channel = -1;
         }
         //printf("got output\n");
-    }
-
-    return chips->buf;
+    }//chips
 }
 

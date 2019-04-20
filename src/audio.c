@@ -30,14 +30,7 @@ struct super
 
 int process(uint32_t nframes, void *arg)
 {
-    int i,j;
-
-    short x;
-    static short high = 0;
-    static short low = 0;
-
     struct super* s = (struct super*)arg;
-
 
     read_midi(s->midi->seq,nframes, s->midi);
 
@@ -49,52 +42,7 @@ int process(uint32_t nframes, void *arg)
     float* outr = s->outr;
 #endif
 
-    for(i=0; i<nframes; i++)
-    {
-    	outr[i] = 0.0;
-		outl[i] = 0.0;
-    }
-
-    short *sid_buf = sid_process(s->sid_bank, s->midi, s->sid_instr, (int)nframes);
-    for(i=0; i<s->sid_bank->polyphony; i++)
-    {
-    	//This multistep approach tells if the voice is active and which instrument it's playing
-        int channel = s->midi->midi_keys[i]->channel;
-        if(channel==-1) continue;
-        int program = s->midi->midi_channels[channel].program;
-        if(program==-1) continue;
-        //int inst_num=midi_programs[channel];
-        int inst_num = s->midi->midi_programs[program];
-        if(inst_num==-1) continue;
-        sid_instrument_t *instr = s->sid_instr[inst_num];
-        float volume = ((float)s->midi->midi_keys[i]->velocity)/128.0;
-        for(j=0; j<nframes; j++)
-        {
-            x = sid_buf[(i*nframes)+j];
-            sid_buf[(i*nframes)+j] = 0;
-            float a = ((float)x)/32768.0;
-
-            if(!s->sid_bank->use_sid_volume) a *= volume;
-
-            float al = a*instr->vol_left;
-            float ar = a*instr->vol_right;
-
-            if(instr->panning)
-            {
-                // 0-127 -> 0.0-2.0
-                float note = ((float)s->midi->midi_keys[i]->note)/64.0;
-                al *= 2.0-note;
-                ar *= note;
-            }
-
-            outl[j] += al;
-            outr[j] += ar;
-
-            if(x>high) high = x;
-            if(x<low) low = x;
-        }
-    }
-    //printf("low: %d, high: %d\n", low, high);
+    sid_process(s->sid_bank, s->midi, s->sid_instr, (int)nframes, outr, outl);
     return 0;
 }
 
